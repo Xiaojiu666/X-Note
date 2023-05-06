@@ -14,11 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.gx.note.ui.ParamsConfig
+import com.gx.note.ui.RichEditor
 import com.gx.note.ui.RouteConfig
 import com.gx.note.ui.ScaffoldMenuSamples
 import com.gx.note.ui.theme.XNoteTheme
@@ -29,15 +31,18 @@ class MainActivity : ComponentActivity() {
         setContent {
             XNoteTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-//                    NavHostDemo()
-                    ScaffoldMenuSamples()
-                }
+                RichEditor()
+//                Surface(
+//                    modifier = Modifier.fillMaxSize(),
+//                    color = MaterialTheme.colorScheme.background
+//                ) {
+////                    NavHostDemo()
+//                    ScaffoldMenuSamples()
+//                }
             }
         }
+        KeyboardHandler(findViewById(android.R.id.content)).handleKeyboard()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
     }
 }
 
