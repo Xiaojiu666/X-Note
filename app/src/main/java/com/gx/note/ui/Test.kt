@@ -3,29 +3,36 @@ package com.gx.note.ui
 
 fun main() {
     val tom = Person("Tom", 19, null)
-    val nulTom: Person? = null
-    println("tom person info ${tom.hashCode()}")
-    nulTom?.let { }
+    val nulTom: Student? = null
+    nulTom?.also {
 
+    }?.person
+    var name = with(tom) {
+
+        111
+    }
+    println("tom person info ${name}")
+    val alsoTom = tom.also { person ->
+        person.age = 20
+    }
+    val applyTom = tom.apply {
+        age = 20
+    }
+    val letTom = tom.let { person ->
+        person.age = 20
+        Student(person)
+    }
     val runTom = tom.run {
         age = 20
         Student(this)
     }
-    val applyTom = tom.apply {
-        age = 20
-        Student(this)
-    }
-
-    val alsoTom = tom.also {
-        it.age = 20
-        Student(it)
-    }
-    val letTom = tom.let {
-        it.age = 20
-        Student(it)
-    }
-    println("tom person info ${alsoTom.toString()}")
-    println("tom person info ${letTom.toString()}")
+//
+//    println("tom person info ${tom.hashCode()}")
+//    println("tom person info ${alsoTom === tom}")
+//    println("tom person info ${applyTom === tom}")
+//
+//    println("tom person info ${letTom.person === tom}")
+//    println("tom person info ${runTom.person === tom}")
 
 }
 
@@ -33,6 +40,10 @@ fun main() {
 data class Person(val name: String, var age: Int, var money: Int?) {
     fun work() {
         println("Person is working ")
+    }
+
+    override fun hashCode(): Int {
+        return super.hashCode()
     }
 }
 
