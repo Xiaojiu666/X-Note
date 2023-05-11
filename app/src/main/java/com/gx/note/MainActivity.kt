@@ -19,6 +19,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.gx.note.ui.MyAnimatedVisibility
 import com.gx.note.ui.ParamsConfig
 import com.gx.note.ui.RichEditor
 import com.gx.note.ui.RouteConfig
@@ -30,7 +31,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             XNoteTheme {
-                // A surface container using the 'background' color from the theme
+                // A surface container using the 'background' color from the theme\
+//                MyAnimatedVisibility()
                 RichEditor()
 //                Surface(
 //                    modifier = Modifier.fillMaxSize(),
@@ -41,8 +43,8 @@ class MainActivity : ComponentActivity() {
 //                }
             }
         }
-        KeyboardHandler(findViewById(android.R.id.content)).handleKeyboard()
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+//        KeyboardHandler(findViewById(android.R.id.content)).handleKeyboard()
+//        WindowCompat.setDecorFitsSystemWindows(window, false)
     }
 }
 
