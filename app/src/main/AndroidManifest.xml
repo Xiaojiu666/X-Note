@@ -4,6 +4,7 @@
     package="com.gx.note">
 
     <application
+        android:name=".NoteApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -16,13 +17,10 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.XNote">
+            android:theme="@style/Theme.XNote"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
-                <action
-                    android:name="android.intent.action.MAIN"
-                    />
+                <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
