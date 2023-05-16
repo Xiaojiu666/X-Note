@@ -1,4 +1,4 @@
-package com.gx.note
+package com.gx.note.ui.utils
 
 import android.os.Build
 import android.util.Log
