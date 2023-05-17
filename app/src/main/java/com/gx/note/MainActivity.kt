@@ -1,13 +1,12 @@
 package com.gx.note
 
+import android.R
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,12 +18,11 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.gx.note.ui.MyAnimatedVisibility
 import com.gx.note.ui.ParamsConfig
 import com.gx.note.ui.RichEditor
 import com.gx.note.ui.RouteConfig
-import com.gx.note.ui.ScaffoldMenuSamples
 import com.gx.note.ui.theme.XNoteTheme
+import com.gx.note.ui.utils.KeyboardHandler
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,8 +41,8 @@ class MainActivity : ComponentActivity() {
 //                }
             }
         }
-//        KeyboardHandler(findViewById(android.R.id.content)).handleKeyboard()
-//        WindowCompat.setDecorFitsSystemWindows(window, false)
+        KeyboardHandler(findViewById(R.id.content)).handleKeyboard()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
     }
 }
 
