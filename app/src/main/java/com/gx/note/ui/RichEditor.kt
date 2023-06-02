@@ -31,6 +31,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -48,25 +50,28 @@ import com.gx.note.ui.utils.keyboardAsState
 
 
 @Composable
-fun RichEditor() {
+fun RichEditor(
+    hint: String,
+    value: TextFieldValue,
+    onTextFieldValueChange: (TextFieldValue) -> Unit,
+) {
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding()
     ) {
-        val hint = stringResource(id = R.string.editor_hint)
+//
+//        var value by remember {
+//            mutableStateOf(TextFieldValue())
+//        }
 
-        var value by remember {
-            mutableStateOf(TextFieldValue())
-        }
-
-        var editorTexts = remember {
-            mutableListOf(EditorText("", 0, 0, SpanStyleNormal))
-        }
-
-        var currentEditorType by remember {
-            mutableStateOf<SpanStyleType>(SpanStyleNormal)
-        }
+//        var editorTexts = remember {
+//            mutableListOf(EditorText("", 0, 0, SpanStyleNormal))
+//        }
+//
+//        var currentEditorType by remember {
+//            mutableStateOf<SpanStyleType>(SpanStyleNormal)
+//        }
         val (editorContent, editorBottom) = createRefs()
 
         EditorBottomView(
@@ -75,47 +80,51 @@ fun RichEditor() {
                 end.linkTo(parent.end)
                 bottom.linkTo(parent.bottom)
             }, onBoldClick = {
-                currentEditorType = SpanStyleBold
+//                currentEditorType = SpanStyleBold
             })
-        Log.e("editorTexts", "editorTexts$editorTexts")
+
         EditorContentView(
             hint = hint,
-            value = value.withStyle(editorTexts),
+            value = value,
             modifier = Modifier.constrainAs(editorContent) {
                 start.linkTo(parent.start)
                 top.linkTo(parent.top)
                 end.linkTo(parent.end)
                 bottom.linkTo(editorBottom.top)
                 height = preferredWrapContent
-            }) {
-            value = it
-            val lastEditorText = editorTexts.last()
-            if (lastEditorText.spanStyleType
-                == currentEditorType
-            ) {
-                val copy = editorTexts.last()
-                    .copy(
-                        text = it.text,
-                        startPosition = lastEditorText.startPosition,
-                        endPosition = it.selection.end
-                    )
-                editorTexts.removeAt(editorTexts.lastIndex)
-                editorTexts.add(copy)
-//                editorTexts = editorTexts.updateLastText(it)
-                Log.e("editorTexts", "updateLastText$editorTexts")
-            } else {
-                val text =
-                    it.text.substring(lastEditorText.endPosition, it.selection.end)
-                editorTexts.add(
-                    EditorText(
-                        text,
-                        lastEditorText.endPosition,
-                        it.selection.end,
-                        currentEditorType
-                    )
-                )
-            }
-        }
+            },
+            onValueChange = onTextFieldValueChange
+        )
+//        {
+//            Log.e("editorTexts", "editorTexts${it.text}")
+//            value = it
+////            val lastEditorText = editorTexts.last()
+////            if (lastEditorText.spanStyleType
+////                == currentEditorType
+////            ) {
+////                val copy = editorTexts.last()
+////                    .copy(
+////                        text = it.text,
+////                        startPosition = lastEditorText.startPosition,
+////                        endPosition = it.selection.end
+////                    )
+////                editorTexts.removeAt(editorTexts.lastIndex)
+////                editorTexts.add(copy)
+//////                editorTexts = editorTexts.updateLastText(it)
+////                Log.e("editorTexts", "updateLastText$editorTexts")
+////            } else {
+////                val text =
+////                    it.text.substring(lastEditorText.endPosition, it.selection.end)
+////                editorTexts.add(
+////                    EditorText(
+////                        text,
+////                        lastEditorText.endPosition,
+////                        it.selection.end,
+////                        currentEditorType
+////                    )
+////                )
+////            }
+//        }
     }
 }
 
@@ -177,8 +186,12 @@ fun EditorContentView(
 }
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun EditorBottomView(modifier: Modifier = Modifier, onBoldClick: () -> Unit) {
+   val softwareKeyboardController =  LocalSoftwareKeyboardController.current
+    softwareKeyboardController?.let {
+    }
     Column(
         modifier = modifier
             .fillMaxWidth()

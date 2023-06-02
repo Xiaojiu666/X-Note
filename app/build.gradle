@@ -60,6 +60,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:$nav_version")
     implementation("com.google.dagger:hilt-android:2.44")
     kapt("com.google.dagger:hilt-android-compiler:2.44")
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.27.0"
+
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
