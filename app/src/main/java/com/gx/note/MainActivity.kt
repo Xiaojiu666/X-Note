@@ -19,9 +19,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.gx.note.ui.ParamsConfig
-import com.gx.note.ui.RichEditor
 import com.gx.note.ui.RouteConfig
 import com.gx.note.ui.theme.XNoteTheme
 import com.gx.note.ui.utils.KeyboardHandler
