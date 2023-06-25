@@ -25,7 +25,7 @@ fun baseBlack() = colorResource(R.color.black)
 fun baseWhite() = colorResource(R.color.white)
 
 @Composable
-fun baseTheme() = colorResource(R.color.theme)
+fun baseTheme() = colorResource(R.color.black)
 
 @Composable
 fun toolBarColor() = baseTheme()

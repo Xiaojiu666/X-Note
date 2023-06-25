@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.keyframes
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -14,11 +13,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,6 +33,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -44,6 +47,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.gx.note.ui.LocalGlobalNavController
+import com.gx.note.ui.RouteConfig
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -56,9 +62,9 @@ fun DiaryHomePage(diaryHomeViewModel: DiaryHomeViewModel) {
             .background(Color.Black)
             .navigationBarsPadding()
     ) {
-
         Box(
             modifier = Modifier
+                .padding(it)
                 .fillMaxSize()
                 .background(Color.Black)
         ) {
@@ -77,7 +83,10 @@ fun DiaryHomePage(diaryHomeViewModel: DiaryHomeViewModel) {
                         text = stringResource(id = R.string.app_name),
                         modifier = Modifier
                             .align(Alignment.CenterStart)
-                            .padding(top = 50.dp),
+                            .padding(top = 50.dp)
+                            .clickable {
+                                uiState.addNoteEntity()
+                            },
                         color = Color.White,
                         fontSize = 30.sp,
                         fontFamily = FontFamily.Serif
@@ -103,31 +112,26 @@ fun DiaryHomePage(diaryHomeViewModel: DiaryHomeViewModel) {
                 }
             }
             var expanded by remember { mutableStateOf(false) }
-            AnimatedContent(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(bottom = 20.dp)
-                    .padding(end = 40.dp)
-                    .background(Color(0xFFCC4F4F), RoundedCornerShape(10.dp)),
+            AnimatedContent(modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 40.dp, bottom = 40.dp)
+                .background(Color(0xFFCC4F4F), RoundedCornerShape(10.dp)),
                 targetState = expanded,
                 transitionSpec = {
-                    fadeIn(animationSpec = tween(150)) with
-                            fadeOut(animationSpec = tween(150)) using
-                            SizeTransform { initialSize, targetSize ->
-                                if (targetState) {
-                                    keyframes {
-                                        IntSize(targetSize.width, initialSize.height) at 150
-                                        durationMillis = 300
-                                    }
-                                } else {
-                                    keyframes {
-                                        IntSize(initialSize.width, targetSize.height) at 150
-                                        durationMillis = 300
-                                    }
-                                }
+                    fadeIn(animationSpec = tween(150)) with fadeOut(animationSpec = tween(150)) using SizeTransform { initialSize, targetSize ->
+                        if (targetState) {
+                            keyframes {
+                                IntSize(targetSize.width, initialSize.height) at 150
+                                durationMillis = 300
                             }
-                }
-            ) { targetExpanded ->
+                        } else {
+                            keyframes {
+                                IntSize(initialSize.width, targetSize.height) at 150
+                                durationMillis = 300
+                            }
+                        }
+                    }
+                }) { targetExpanded ->
                 if (targetExpanded) {
                     Expanded {
                         expanded = false
@@ -144,17 +148,41 @@ fun DiaryHomePage(diaryHomeViewModel: DiaryHomeViewModel) {
 
 @Composable
 fun Expanded(clickable: () -> Unit) {
-    Column(modifier = Modifier
-        .background(Color(0xFFCC4F4F), RoundedCornerShape(10.dp))
-        .width(120.dp)
-        .height(120.dp)
-        .clickable {
-            clickable()
-        }) {
-        Text(text = "日记本")
-        Text(text = "账本")
-        Text(text = "TODO")
-        Text(text = "随笔")
+    val navController = LocalGlobalNavController.current!!
+    Column(
+        modifier = Modifier
+            .background(Color(0xFFCC4F4F), RoundedCornerShape(10.dp))
+    ) {
+        itemNoteType(NoteType.DIARY) {
+            navController.navigate(RouteConfig.ROUTE_DIARY_HOME)
+        }
+        itemNoteType(NoteType.ACCOUNT) {
+
+        }
+        itemNoteType(NoteType.TODO) {
+
+        }
+    }
+}
+
+
+@Composable
+fun itemNoteType(noteType: NoteType, clickable: (NoteType) -> Unit = {}) {
+    Row(
+        modifier = Modifier
+            .padding(8.dp)
+            .clickable {
+                clickable(noteType)
+            }
+    ) {
+        Image(
+            modifier = Modifier
+                .align(CenterVertically)
+                .size(16.dp),
+            painter = painterResource(id = noteType.resId),
+            contentDescription = ""
+        )
+        Text(text = noteType.name, modifier = Modifier.padding(4.dp), color = Color.White)
     }
 }
 
@@ -210,17 +238,15 @@ fun itemHome(noteName: String, noteCount: Int) {
         AnimatedContent(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(horizontal = 16.dp), targetState = noteCount
+                .padding(horizontal = 16.dp),
+            targetState = noteCount
         ) { targetCount ->
             Text(
-                text = targetCount.toString(),
-                color = Color.White,
-                fontFamily = FontFamily(
+                text = targetCount.toString(), color = Color.White, fontFamily = FontFamily(
                     Font(
                         resId = R.font.number, weight = FontWeight.Bold, style = FontStyle.Italic
                     )
-                ),
-                fontSize = 66.sp
+                ), fontSize = 66.sp
             )
         }
     }
@@ -231,6 +257,12 @@ fun itemHome(noteName: String, noteCount: Int) {
 @Composable
 fun itemHomePrw() {
     itemHome("你好", 10)
+}
+
+@Preview
+@Composable
+fun itemNoteTypePre() {
+    itemNoteType(NoteType.DIARY)
 }
 
 @Preview

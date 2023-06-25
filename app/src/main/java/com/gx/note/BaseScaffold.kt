@@ -12,14 +12,12 @@ import androidx.compose.ui.Modifier
 @Composable
 fun BaseScaffold(
     scaffoldState: ScaffoldState,
-    baseToolbar: @Composable () -> Unit = { BaseBackToolbar(title = "你好") },
+    baseToolbar: @Composable () -> Unit = {  },
     content: @Composable () -> Unit = { }
 ) {
     Scaffold(
         modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .systemBarsPadding(),
+            .fillMaxSize(),
         snackbarHost = { snackbarHostState ->
 
         },

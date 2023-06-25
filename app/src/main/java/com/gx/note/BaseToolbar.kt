@@ -29,7 +29,6 @@ import com.gx.note.ui.theme.subtitle2Bold
 
 val TOOLBAR_HEIGHT = 56.dp
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BaseToolbar(
     startContent: @Composable BoxScope.() -> Unit = {},

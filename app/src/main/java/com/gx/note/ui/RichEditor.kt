@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Devices
@@ -45,33 +46,25 @@ import androidx.constraintlayout.compose.Dimension.Companion.preferredWrapConten
 import androidx.constraintlayout.compose.Dimension.Companion.value
 import com.gx.note.ui.utils.Keyboard
 import com.gx.note.R
+import com.gx.note.baseBlack
+import com.gx.note.baseWhite
 import com.gx.note.ui.theme.body2
 import com.gx.note.ui.utils.keyboardAsState
 
 
 @Composable
 fun RichEditor(
+    modifier: Modifier = Modifier,
     hint: String,
     value: TextFieldValue,
     onTextFieldValueChange: (TextFieldValue) -> Unit,
 ) {
     ConstraintLayout(
         modifier = Modifier
+            .then(modifier)
             .fillMaxSize()
-            .statusBarsPadding()
+            .background(baseWhite())
     ) {
-//
-//        var value by remember {
-//            mutableStateOf(TextFieldValue())
-//        }
-
-//        var editorTexts = remember {
-//            mutableListOf(EditorText("", 0, 0, SpanStyleNormal))
-//        }
-//
-//        var currentEditorType by remember {
-//            mutableStateOf<SpanStyleType>(SpanStyleNormal)
-//        }
         val (editorContent, editorBottom) = createRefs()
 
         EditorBottomView(
@@ -90,8 +83,7 @@ fun RichEditor(
                 start.linkTo(parent.start)
                 top.linkTo(parent.top)
                 end.linkTo(parent.end)
-                bottom.linkTo(editorBottom.top)
-                height = preferredWrapContent
+                bottom.linkTo(parent.bottom)
             },
             onValueChange = onTextFieldValueChange
         )
@@ -171,7 +163,7 @@ fun EditorContentView(
                 .focusRequester(focusRequester)
                 .fillMaxSize(),
             value = value,
-            textStyle = body2,
+            textStyle = body2 + TextStyle(color = baseBlack()),
             onValueChange = onValueChange,
             decorationBox = {
                 if (value.text.isEmpty()) {
@@ -189,7 +181,7 @@ fun EditorContentView(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun EditorBottomView(modifier: Modifier = Modifier, onBoldClick: () -> Unit) {
-   val softwareKeyboardController =  LocalSoftwareKeyboardController.current
+    val softwareKeyboardController = LocalSoftwareKeyboardController.current
     softwareKeyboardController?.let {
     }
     Column(
