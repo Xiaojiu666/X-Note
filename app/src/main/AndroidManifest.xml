@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.gx.note">
 
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
+
     <application
         android:name=".NoteApp"
         android:allowBackup="true"
@@ -10,10 +12,10 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:exported="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.XNote"
-        tools:targetApi="31">
+        android:theme="@style/Theme.XNote">
         <activity
             android:name=".MainActivity"
             android:exported="true"

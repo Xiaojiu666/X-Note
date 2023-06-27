@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">X-Note</string>
-    <string name="editor_hint">请输入内容</string>
+    <string name="editor_hint">请输入您的内容~</string>
+    <string name="editor_title_hint">笔记标题</string>
 </resources>

@@ -7,29 +7,34 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -42,6 +47,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.Dimension
 import androidx.constraintlayout.compose.Dimension.Companion.preferredWrapContent
 import androidx.constraintlayout.compose.Dimension.Companion.value
 import com.gx.note.ui.utils.Keyboard
@@ -49,15 +55,19 @@ import com.gx.note.R
 import com.gx.note.baseBlack
 import com.gx.note.baseWhite
 import com.gx.note.ui.theme.body2
+import com.gx.note.ui.theme.headline5
+import com.gx.note.ui.theme.headline6Sans
 import com.gx.note.ui.utils.keyboardAsState
 
 
 @Composable
 fun RichEditor(
     modifier: Modifier = Modifier,
-    hint: String,
     value: TextFieldValue,
+    titleValue: TextFieldValue,
     onTextFieldValueChange: (TextFieldValue) -> Unit,
+    onTitleValueChange: (TextFieldValue) -> Unit,
+    onTypeChange: (SpanStyleType) -> Unit
 ) {
     ConstraintLayout(
         modifier = Modifier
@@ -65,63 +75,65 @@ fun RichEditor(
             .fillMaxSize()
             .background(baseWhite())
     ) {
-        val (editorContent, editorBottom) = createRefs()
+        val (editorTitle, editorContent, editorBottom) = createRefs()
+
+        Row(
+            modifier = Modifier
+                .constrainAs(editorTitle) {
+                    start.linkTo(parent.start)
+                    top.linkTo(parent.top)
+                    end.linkTo(parent.end)
+                }
+        ) {
+            EditorTitle(
+                modifier = Modifier
+                    .align(CenterVertically)
+                    .padding(horizontal = 16.dp)
+
+                    .padding(vertical = 8.dp)
+                    .height(72.dp),
+                hint = stringResource(id = R.string.editor_title_hint),
+                value = titleValue,
+                onValueChange = onTitleValueChange
+            )
+        }
+
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.LightGray)
+                .height(0.5.dp)
+        )
+
+        EditorContentView(
+            hint = stringResource(id = R.string.editor_hint),
+            value = value,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .constrainAs(editorContent) {
+                    start.linkTo(parent.start)
+                    top.linkTo(editorTitle.bottom)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(parent.bottom)
+                },
+            onValueChange = onTextFieldValueChange
+        )
+
+
 
         EditorBottomView(
             modifier = Modifier.constrainAs(editorBottom) {
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
                 bottom.linkTo(parent.bottom)
-            }, onBoldClick = {
-//                currentEditorType = SpanStyleBold
-            })
+            }, onBoldClick = onTypeChange)
 
-        EditorContentView(
-            hint = hint,
-            value = value,
-            modifier = Modifier.constrainAs(editorContent) {
-                start.linkTo(parent.start)
-                top.linkTo(parent.top)
-                end.linkTo(parent.end)
-                bottom.linkTo(parent.bottom)
-            },
-            onValueChange = onTextFieldValueChange
-        )
-//        {
-//            Log.e("editorTexts", "editorTexts${it.text}")
-//            value = it
-////            val lastEditorText = editorTexts.last()
-////            if (lastEditorText.spanStyleType
-////                == currentEditorType
-////            ) {
-////                val copy = editorTexts.last()
-////                    .copy(
-////                        text = it.text,
-////                        startPosition = lastEditorText.startPosition,
-////                        endPosition = it.selection.end
-////                    )
-////                editorTexts.removeAt(editorTexts.lastIndex)
-////                editorTexts.add(copy)
-//////                editorTexts = editorTexts.updateLastText(it)
-////                Log.e("editorTexts", "updateLastText$editorTexts")
-////            } else {
-////                val text =
-////                    it.text.substring(lastEditorText.endPosition, it.selection.end)
-////                editorTexts.add(
-////                    EditorText(
-////                        text,
-////                        lastEditorText.endPosition,
-////                        it.selection.end,
-////                        currentEditorType
-////                    )
-////                )
-////            }
-//        }
+
     }
 }
 
 
-fun List<EditorText>.updateLastText(value: TextFieldValue): MutableList<EditorText> =
+fun List<TextContent>.updateLastText(value: TextFieldValue): MutableList<TextContent> =
     mapIndexed { index, editorText ->
         if (index == lastIndex) {
             editorText.copy(text = value.text, endPosition = value.selection.end)
@@ -130,14 +142,12 @@ fun List<EditorText>.updateLastText(value: TextFieldValue): MutableList<EditorTe
         }
     }.toMutableList()
 
-fun TextFieldValue.withStyle(editorTexts: List<EditorText>) =
+fun TextFieldValue.withStyle(editorTexts: List<TextContent>) =
     copy(annotatedString = buildAnnotatedString {
         editorTexts.forEach { editorText ->
             append(editorText.text)
             addStyle(
-                SpanStyle(
-                    color = Color.Blue
-                ),
+                editorText.spanStyleType.spanStyle,
                 editorText.startPosition, editorText.endPosition
             )
         }
@@ -180,7 +190,8 @@ fun EditorContentView(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun EditorBottomView(modifier: Modifier = Modifier, onBoldClick: () -> Unit) {
+fun EditorBottomView(modifier: Modifier = Modifier, onBoldClick: (SpanStyleType) -> Unit) {
+
     val softwareKeyboardController = LocalSoftwareKeyboardController.current
     softwareKeyboardController?.let {
     }
@@ -191,21 +202,47 @@ fun EditorBottomView(modifier: Modifier = Modifier, onBoldClick: () -> Unit) {
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.DarkGray)
-                .height(1.dp)
+                .background(Color.LightGray)
+                .height(0.5.dp)
         )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 16.dp)
                 .horizontalScroll(rememberScrollState())
-                .height(32.dp)
+                .height(46.dp)
         ) {
+
+
             Image(
                 modifier = Modifier
                     .align(CenterVertically)
-                    .size(16.dp)
+                    .size(18.dp)
                     .clickable {
-                        onBoldClick()
+                        onBoldClick(SpanStyleNormal)
+                    },
+                painter = painterResource(R.mipmap.ic_editor_blod),
+                contentDescription = ""
+            )
+
+
+            Image(
+                modifier = Modifier
+                    .align(CenterVertically)
+                    .size(18.dp)
+                    .clickable {
+                        onBoldClick(SpanStyleBold)
+                    },
+                painter = painterResource(R.mipmap.ic_editor_blod),
+                contentDescription = ""
+            )
+
+            Image(
+                modifier = Modifier
+                    .align(CenterVertically)
+                    .size(18.dp)
+                    .clickable {
+                        onBoldClick(SpanStyleColor(Color.Blue))
                     },
                 painter = painterResource(R.mipmap.ic_editor_blod),
                 contentDescription = ""
@@ -231,10 +268,48 @@ fun EditorBottomView(modifier: Modifier = Modifier, onBoldClick: () -> Unit) {
 }
 
 
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun EditorTitle(
+    modifier: Modifier = Modifier,
+    hint: String = "",
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit
+) {
+    val (focusRequester) = FocusRequester.createRefs()
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+    BasicTextField(
+        modifier = Modifier
+            .then(modifier)
+            .focusRequester(focusRequester)
+            .fillMaxWidth(),
+        singleLine = true,
+        value = value,
+        textStyle = headline6Sans + TextStyle(color = baseBlack()),
+        onValueChange = onValueChange,
+        cursorBrush = SolidColor(Color.Gray),
+        decorationBox = {
+            if (value.text.isEmpty()) {
+                Text(
+                    text = hint,
+                    color = Color.Gray,
+                    style = headline6Sans + TextStyle(color = Color.Gray),
+                )
+            }
+            it()
+        },
+    )
+}
+
+
 @Preview(device = Devices.NEXUS_5)
 @Composable
 fun preEditorContentView() {
-//    RichEditor()
+    EditorTitle(value = TextFieldValue("你好")) {
+
+    }
 }
 
 @Preview(device = Devices.NEXUS_5, backgroundColor = 0xFFFFFF)

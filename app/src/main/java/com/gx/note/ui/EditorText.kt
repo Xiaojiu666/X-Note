@@ -1,6 +1,8 @@
 package com.gx.note.ui
 
-data class EditorText(
+
+
+data class TextContent(
     val text: String,
     val startPosition: Int,
     val endPosition: Int,
