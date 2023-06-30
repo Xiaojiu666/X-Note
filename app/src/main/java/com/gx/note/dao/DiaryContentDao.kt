@@ -13,8 +13,8 @@ interface DiaryContentDao {
     @Query("SELECT * FROM diarycontent")
     fun getAll(): List<DiaryContent>
 
-//    @Query("SELECT * FROM user WHERE uid IN (:userIds)")
-//    fun loadAllByIds(userIds: IntArray): List<DiaryContent>
+    @Query("SELECT * FROM diarycontent WHERE id == :id")
+    fun loadAllByIds(id: Int): DiaryContent
 //
 //    @Query("SELECT * FROM user WHERE first_name LIKE :first AND " +
 //            "last_name LIKE :last LIMIT 1")

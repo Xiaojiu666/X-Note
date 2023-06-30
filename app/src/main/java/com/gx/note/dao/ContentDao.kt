@@ -14,8 +14,8 @@ interface ContentDao {
     @Query("SELECT * FROM textcontent")
     fun getAll(): List<TextContent>
 
-//    @Query("SELECT * FROM user WHERE uid IN (:userIds)")
-//    fun loadAllByIds(userIds: IntArray): List<DiaryContent>
+    @Query("SELECT * FROM textcontent WHERE diaryId = :diaryId")
+    fun loadAllByIds(diaryId: Int): List<TextContent>
 //
 //    @Query("SELECT * FROM user WHERE first_name LIKE :first AND " +
 //            "last_name LIKE :last LIMIT 1")

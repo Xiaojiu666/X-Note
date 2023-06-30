@@ -1,5 +1,6 @@
 package com.gx.note
 
+import android.util.Log
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,7 +29,6 @@ class DiaryEditViewModel @Inject constructor(
         _uiState.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initDiaryEditUiState())
 
     private fun initDiaryEditUiState(): DiaryEditUiState {
-
         val richEditorContentUiState = RichEditorContentUiState(
             textFieldValue = TextFieldValue(),
             spanStyleType = SpanStyleNormal,
@@ -105,13 +105,15 @@ class DiaryEditViewModel @Inject constructor(
                         richEditorUi.copy(textFieldValue = it)
                     }
                 }
-            }, onSpanTypeChange = {
+            },
+            onSpanTypeChange = {
                 viewModelScope.launch {
                     updateRichEditorContentUiState { richEditorUi ->
                         richEditorUi.copy(spanStyleType = it)
                     }
                 }
-            }, textContent = mutableListOf()
+            },
+            textContent = mutableListOf()
         )
         val richEditorTitleUiState = RichEditorTitleUiState(
             titleValue = TextFieldValue(),
@@ -123,6 +125,27 @@ class DiaryEditViewModel @Inject constructor(
                 }
             })
         return DiaryEditUiState(richEditorContentUiState, richEditorTitleUiState, ::saveDiary)
+    }
+
+    init {
+        initDiary()
+    }
+
+    private fun initDiary() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val data = repo.appDatabase.diaryContentDao().loadAllByIds(2)
+            val list = repo.appDatabase.textContentDao().loadAllByIds(2)
+            val content = list.joinToString("") {
+                it.text
+            }
+            updateRichEditorTitleUiState {
+                it.copy(titleValue = TextFieldValue(data.name))
+            }
+
+            updateRichEditorContentUiState { richEditorUi ->
+                richEditorUi.copy(textContent = list.toMutableList())
+            }
+        }
     }
 
 
