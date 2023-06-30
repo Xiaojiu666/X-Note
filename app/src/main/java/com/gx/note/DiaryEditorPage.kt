@@ -44,7 +44,12 @@ fun DiaryEditorPage(diaryEditViewModel: DiaryEditViewModel, onBackClick: () -> U
 
         },
         topBar = {
-            BaseBackToolbar(title = "Diary", onLeftIconClick = onBackClick)
+            BaseBackToolbar(
+                title = "Diary",
+                rightIconId = R.drawable.ic_save,
+                onLeftIconClick = onBackClick,
+                onRightIconClick = uiState.onSaveDiary,
+            )
         }
     ) {
 

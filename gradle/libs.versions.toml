@@ -10,6 +10,8 @@ hilt = "2.44"
 hilt-navigation-compose = "1.0.0"
 hiltExt = "1.0.0"
 
+room-version = "2.5.1"
+
 androidxLifecycle = "2.6.1"
 
 [libraries]
@@ -34,5 +36,11 @@ lifecycle-runtimeCompose = { group = "androidx.lifecycle", name = "lifecycle-run
 
 compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 compose-ui-util = { group = "androidx.compose.ui", name = "ui-util" }
+
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room-version" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room-version" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room-version" }
+
+
 
 [plugins]
