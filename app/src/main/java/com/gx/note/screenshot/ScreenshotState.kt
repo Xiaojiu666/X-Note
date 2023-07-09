@@ -1,4 +1,4 @@
-package com.mercedesbenz.core_ui.screenshot
+package com.gx.note.screenshot
 
 import android.graphics.Bitmap
 import androidx.compose.runtime.Composable
@@ -44,21 +44,23 @@ open class ScreenshotState internal constructor(
 
     val liveScreenshotFlow = flow {
         while (true) {
+            println("liveScreenshotFlow ${bitmapState.value}"  )
             callback?.invoke()
             delay(timeInMillis)
+            println("bitmapState emit ${bitmapState.value}"  )
             bitmapState.value?.let {
+                println("bitmapState emit $it"  )
                 emit(it)
             }
         }
-    }
-        .map {
+    }.map {
             it.asImageBitmap()
         }
         .flowOn(Dispatchers.Default)
 
     val bitmap: Bitmap?
         get() = bitmapState.value
-
+//
     val imageBitmap: ImageBitmap?
         get() = bitmap?.asImageBitmap()
 }

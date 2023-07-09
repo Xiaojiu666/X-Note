@@ -1,4 +1,4 @@
-package com.mercedesbenz.core_ui.screenshot
+package com.gx.note.screenshot
 
 import android.graphics.Bitmap
 

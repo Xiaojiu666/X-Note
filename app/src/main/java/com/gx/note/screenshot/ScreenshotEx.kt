@@ -11,7 +11,6 @@ import android.view.PixelCopy
 import android.view.View
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.toAndroidRect
-import com.mercedesbenz.core_ui.screenshot.ImageResult
 
 fun View.screenshot(
     bounds: Rect
