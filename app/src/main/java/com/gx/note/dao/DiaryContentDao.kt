@@ -1,5 +1,7 @@
 package com.gx.note.dao
 
+import androidx.compose.foundation.pager.PageSize
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -11,7 +13,13 @@ import com.gx.note.entity.DiaryContentWithTextContent
 @Dao
 interface DiaryContentDao {
     @Query("SELECT * FROM diarycontent")
-    fun getAll(): List<DiaryContent>
+    fun getDiaryList(): List<DiaryContent>
+
+    @Query("SELECT * FROM diarycontent LIMIT :pageNum OFFSET :pageSize")
+    fun getDiaryList(pageNum: Int, pageSize: Int): List<DiaryContent>
+
+    @Query("SELECT * FROM diarycontent")
+    fun getUsers(): PagingSource<Int, DiaryContent>
 
     @Query("SELECT * FROM diarycontent WHERE id == :id")
     fun loadAllByIds(id: Int): DiaryContent

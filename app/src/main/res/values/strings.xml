@@ -2,4 +2,6 @@
     <string name="app_name">X-Note</string>
     <string name="editor_hint">请输入您的内容~</string>
     <string name="editor_title_hint">笔记标题</string>
+    <string name="loading_more">加载更多中…</string>
+    <string name="loading_complete">没有更多数据了~</string>
 </resources>

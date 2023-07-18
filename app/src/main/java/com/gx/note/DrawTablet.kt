@@ -27,9 +27,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun DrawTablet() {
-    // 记录每一次move的路线
     var linepath by remember { mutableStateOf(Offset.Zero) }
-    // 记录path对象
     val path by remember { mutableStateOf(Path()) }
     val screenshotState = rememberScreenshotState()
     val context =  LocalContext.current
@@ -73,7 +71,6 @@ fun DrawTablet() {
                 Button(modifier = Modifier.weight(1f).padding(8.dp), onClick = {
                     scope.launch {
                         screenshotState.capture()
-                        println("liveScreenshotFlow value "  )
                         screenshotState.bitmap?.insertImageToImage(context)
                     }
                 }){
@@ -85,18 +82,15 @@ fun DrawTablet() {
 
 
 fun Bitmap.insertImageToImage(context:Context):Boolean{
-    println("saveUri ${this.toString()}"  )
     val bitmap = this.copy(this.config,true)
     val saveUri  = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
         ContentValues()
     ) ?: return false
-    println("saveUri $saveUri"  )
     val outPutStream = context.contentResolver.openOutputStream(saveUri!!)
     outPutStream?.use {
         try {
             bitmap.compress(Bitmap.CompressFormat.PNG,90,it)
         }catch (e: java.lang.Exception){
-            println("Exception $e"  )
             return false
         }
     }

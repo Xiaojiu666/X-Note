@@ -4,16 +4,20 @@ import android.R
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.gx.note.diary.DiaryListRoute
+import com.gx.note.diary.DiaryListViewModel
+import com.gx.note.home.HomePage
 import com.gx.note.ui.LocalGlobalNavController
 import com.gx.note.ui.RouteConfig
+import com.gx.note.ui.theme.XNoteTheme
 import com.gx.note.ui.utils.KeyboardHandler
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -25,15 +29,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            DrawTablet()
-
-//            HomePageRoute()
-//            HomeNav()
+            HomeNav()
 //            XNoteTheme {
-//                val viewModel: DiaryHomeViewModel by viewModels()
-//                DiaryHomePage(viewModel)
-////                val viewModel: DiaryEditViewModel by viewModels()
-////                DiaryEditorPage(viewModel)
+//
 //            }
 
         }
@@ -50,7 +48,7 @@ class MainActivity : ComponentActivity() {
 
                 composable(RouteConfig.ROUTE_HOME_PAGE) {
                     val viewModel: DiaryHomeViewModel = hiltViewModel()
-                    DiaryHomePage(viewModel)
+                    DiaryHomeRoute(viewModel)
                 }
 
                 composable(RouteConfig.ROUTE_DIARY_HOME) {
@@ -58,6 +56,11 @@ class MainActivity : ComponentActivity() {
                     DiaryEditorPage(viewModel, onBackClick = {
                         navController.popBackStack()
                     })
+                }
+
+                composable(RouteConfig.ROUTE_DIARY_LIST_PAGE) {
+                    val viewModel: DiaryListViewModel = hiltViewModel()
+                    DiaryListRoute(viewModel)
                 }
 
             }

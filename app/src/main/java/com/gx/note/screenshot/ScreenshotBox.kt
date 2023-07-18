@@ -1,18 +1,15 @@
 package com.gx.note.screenshot
 
 import android.graphics.Bitmap
-import android.os.Build
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.core.view.drawToBitmap
 import java.lang.Exception
 
 /**
@@ -26,7 +23,6 @@ fun ScreenshotBox(
     screenshotState: ScreenshotState,
     content: @Composable BoxScope.() -> Unit,
 ) {
-    val context = LocalContext.current
     val view = LocalView.current
 
     var composeView by remember { mutableStateOf<Rect?>(null) }
@@ -71,7 +67,6 @@ fun ScreenshotBox(
     }
 
 //    val density = LocalDensity.current
-
 //    AndroidView(
 //        modifier = modifier,
 //        factory = {

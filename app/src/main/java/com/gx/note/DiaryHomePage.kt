@@ -8,23 +8,22 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.with
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.calculatePan
-import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -36,12 +35,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -52,20 +48,30 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import com.gx.note.ui.LocalGlobalNavController
 import com.gx.note.ui.RouteConfig
+import com.gx.note.ui.RouteConfig.ROUTE_DIARY_LIST_PAGE
+import kotlinx.coroutines.NonDisposableHandle.parent
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
-fun DiaryHomePage(diaryHomeViewModel: DiaryHomeViewModel) {
+fun DiaryHomeRoute(diaryHomeViewModel: DiaryHomeViewModel) {
+    val current = LocalGlobalNavController.current
     val uiState by diaryHomeViewModel.uiState.collectAsState()
+    DiaryHomePage(uiState = uiState, clickable = { current?.navigate(ROUTE_DIARY_LIST_PAGE) })
+}
 
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
+    ExperimentalFoundationApi::class
+)
+@Composable
+fun DiaryHomePage(uiState: DiaryHomeViewModel.DiaryHomeUiState, clickable: () -> Unit) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
-            .navigationBarsPadding()
     ) {
         Box(
             modifier = Modifier
@@ -73,15 +79,20 @@ fun DiaryHomePage(diaryHomeViewModel: DiaryHomeViewModel) {
                 .fillMaxSize()
                 .background(Color.Black)
         ) {
-            Column(
+            ConstraintLayout(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black)
             ) {
-
+                val (title, list, create) = createRefs()
                 Box(
                     Modifier
                         .fillMaxWidth()
+                        .constrainAs(title) {
+                            start.linkTo(parent.start)
+                            top.linkTo(parent.top)
+                            end.linkTo(parent.end)
+                        }
                         .padding(horizontal = 24.dp)
                 ) {
                     Text(
@@ -103,52 +114,142 @@ fun DiaryHomePage(diaryHomeViewModel: DiaryHomeViewModel) {
                         contentDescription = ""
                     )
                 }
-
-                LazyColumn(
-                    modifier = Modifier
-                        .padding(vertical = 16.dp)
-                        .padding(it)
-                        .fillMaxSize()
-                ) {
-                    items(uiState.homeNoteList?.size ?: 0) {
-                        val note = uiState.homeNoteList!![it]
-                        itemHome(note.noteName, note.noteCount)
-                    }
-                }
-            }
-            var expanded by remember { mutableStateOf(false) }
-            AnimatedContent(modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 40.dp, bottom = 40.dp)
-                .background(Color(0xFFCC4F4F), RoundedCornerShape(10.dp)),
-                targetState = expanded,
-                transitionSpec = {
-                    fadeIn(animationSpec = tween(150)) with fadeOut(animationSpec = tween(150)) using SizeTransform { initialSize, targetSize ->
-                        if (targetState) {
-                            keyframes {
-                                IntSize(targetSize.width, initialSize.height) at 150
-                                durationMillis = 300
+                uiState.homeNoteList?.let {
+                    LazyVerticalStaggeredGrid(modifier = Modifier
+                        .constrainAs(list) {
+                            start.linkTo(parent.start)
+                            top.linkTo(title.bottom)
+                            end.linkTo(parent.end)
+                            bottom.linkTo(parent.bottom)
+                            height = Dimension.fillToConstraints
+                        }
+                        .padding(vertical = 8.dp),
+                        columns = StaggeredGridCells.Fixed(2),
+                        content = {
+                            items(it) {
+                                itemHome(
+                                    noteName = it.noteName,
+                                    noteCount = it.noteCount,
+                                    clickable = clickable
+                                )
                             }
-                        } else {
-                            keyframes {
-                                IntSize(initialSize.width, targetSize.height) at 150
-                                durationMillis = 300
+                        })
+                }
+
+                var expanded by remember { mutableStateOf(false) }
+                AnimatedContent(modifier = Modifier
+                    .constrainAs(create) {
+                        end.linkTo(parent.end)
+                        bottom.linkTo(parent.bottom)
+                    }
+                    .padding(end = 40.dp, bottom = 40.dp)
+                    .background(Color(0xFFCC4F4F), RoundedCornerShape(10.dp)),
+                    targetState = expanded,
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(150)) with fadeOut(animationSpec = tween(150)) using SizeTransform { initialSize, targetSize ->
+                            if (targetState) {
+                                keyframes {
+                                    IntSize(targetSize.width, initialSize.height) at 150
+                                    durationMillis = 300
+                                }
+                            } else {
+                                keyframes {
+                                    IntSize(initialSize.width, targetSize.height) at 150
+                                    durationMillis = 300
+                                }
                             }
                         }
-                    }
-                }) { targetExpanded ->
-                if (targetExpanded) {
-                    Expanded {
-                        expanded = false
-                    }
-                } else {
-                    AddButton {
-                        expanded = true
+                    }) { targetExpanded ->
+                    if (targetExpanded) {
+                        Expanded {
+                            expanded = false
+                        }
+                    } else {
+                        AddButton {
+                            expanded = true
+                        }
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+fun content(uiState: DiaryHomeViewModel.DiaryHomeUiState) {
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .background(Color.Black)
+//    ) {
+//        Box(
+//            Modifier
+//                .fillMaxWidth()
+//                .padding(horizontal = 24.dp)
+//        ) {
+//            Text(
+//                text = stringResource(id = R.string.app_name),
+//                modifier = Modifier
+//                    .align(Alignment.CenterStart)
+//                    .padding(top = 50.dp)
+//                    .clickable {
+//                        uiState.addNoteEntity()
+//                    },
+//                color = Color.White,
+//                fontSize = 30.sp,
+//                fontFamily = FontFamily.Serif
+//            )
+//
+//            Image(
+//                modifier = Modifier.align(Alignment.BottomEnd),
+//                painter = painterResource(id = R.drawable.ic_calendar),
+//                contentDescription = ""
+//            )
+//        }
+//
+//        LazyColumn(
+//            modifier = Modifier
+//                .padding(vertical = 16.dp)
+//                .padding(it)
+//                .fillMaxSize()
+//        ) {
+//            items(uiState.homeNoteList?.size ?: 0) {
+//                val note = uiState.homeNoteList!![it]
+//                itemHome(note.noteName, note.noteCount)
+//            }
+//        }
+//    }
+//    var expanded by remember { mutableStateOf(false) }
+//    AnimatedContent(modifier = Modifier
+//        .align(Alignment.BottomEnd)
+//        .padding(end = 40.dp, bottom = 40.dp)
+//        .background(Color(0xFFCC4F4F), RoundedCornerShape(10.dp)),
+//        targetState = expanded,
+//        transitionSpec = {
+//            fadeIn(animationSpec = tween(150)) with fadeOut(animationSpec = tween(150)) using SizeTransform { initialSize, targetSize ->
+//                if (targetState) {
+//                    keyframes {
+//                        IntSize(targetSize.width, initialSize.height) at 150
+//                        durationMillis = 300
+//                    }
+//                } else {
+//                    keyframes {
+//                        IntSize(initialSize.width, targetSize.height) at 150
+//                        durationMillis = 300
+//                    }
+//                }
+//            }
+//        }) { targetExpanded ->
+//        if (targetExpanded) {
+//            Expanded {
+//                expanded = false
+//            }
+//        } else {
+//            AddButton {
+//                expanded = true
+//            }
+//        }
+//    }
 }
 
 @Composable
@@ -211,7 +312,7 @@ fun AddButton(modifier: Modifier = Modifier, clickable: () -> Unit) {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun itemHome(noteName: String, noteCount: Int) {
+fun itemHome(noteName: String, noteCount: Int, clickable: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -220,6 +321,7 @@ fun itemHome(noteName: String, noteCount: Int) {
             .background(
                 Color(0xff1c1e1f), RoundedCornerShape(10.dp)
             )
+            .clickable { clickable() }
     ) {
         Box(
             modifier = Modifier
@@ -261,7 +363,9 @@ fun itemHome(noteName: String, noteCount: Int) {
 @Preview
 @Composable
 fun itemHomePrw() {
-    itemHome("你好", 10)
+    itemHome("你好", 10) {
+
+    }
 }
 
 @Preview

@@ -3,6 +3,10 @@ package com.gx.note
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gx.note.usecase.DiaryUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -16,10 +20,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 import kotlin.coroutines.resume
 
-class DiaryHomeViewModel : ViewModel() {
-
+@HiltViewModel
+class DiaryHomeViewModel @Inject constructor(private val diaryUseCase: DiaryUseCase) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
         DiaryHomeUiState(
@@ -31,16 +36,19 @@ class DiaryHomeViewModel : ViewModel() {
             SharingStarted.WhileSubscribed(),
             DiaryHomeUiState(homeNoteList = null, addNoteEntity = {})
         )
+
     init {
         initDiaryHomeUiState()
     }
 
     private fun initDiaryHomeUiState() {
-        viewModelScope.launch {
+        viewModelScope.launch(IO) {
+            val diaryList = diaryUseCase.getDiaryList()
             updateUiState { it ->
                 it.copy(
                     homeNoteList = listOf(
-                        NoteEntity("笔记", 1)
+                        NoteEntity("日记", diaryList.size),
+                        NoteEntity("账本", 0),
                     ),
                     addNoteEntity = ::addNote
                 )
