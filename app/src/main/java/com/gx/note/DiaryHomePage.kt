@@ -26,6 +26,8 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,7 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -53,7 +54,10 @@ import androidx.constraintlayout.compose.Dimension
 import com.gx.note.ui.LocalGlobalNavController
 import com.gx.note.ui.RouteConfig
 import com.gx.note.ui.RouteConfig.ROUTE_DIARY_LIST_PAGE
-import kotlinx.coroutines.NonDisposableHandle.parent
+import com.gx.note.ui.theme.colorPrimary
+import com.gx.note.ui.theme.colorSecondary
+import com.gx.note.ui.theme.colorTertiary
+
 
 @Composable
 fun DiaryHomeRoute(diaryHomeViewModel: DiaryHomeViewModel) {
@@ -63,26 +67,26 @@ fun DiaryHomeRoute(diaryHomeViewModel: DiaryHomeViewModel) {
 }
 
 @OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
-    ExperimentalFoundationApi::class
+    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+    ExperimentalAnimationApi::class
 )
 @Composable
 fun DiaryHomePage(uiState: DiaryHomeViewModel.DiaryHomeUiState, clickable: () -> Unit) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(colorPrimary())
     ) {
         Box(
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
-                .background(Color.Black)
+                .background(colorPrimary())
         ) {
             ConstraintLayout(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black)
+                    .background(colorPrimary())
             ) {
                 val (title, list, create) = createRefs()
                 Box(
@@ -103,7 +107,7 @@ fun DiaryHomePage(uiState: DiaryHomeViewModel.DiaryHomeUiState, clickable: () ->
                             .clickable {
                                 uiState.addNoteEntity()
                             },
-                        color = Color.White,
+                        color = colorSecondary(),
                         fontSize = 30.sp,
                         fontFamily = FontFamily.Serif
                     )
@@ -143,7 +147,7 @@ fun DiaryHomePage(uiState: DiaryHomeViewModel.DiaryHomeUiState, clickable: () ->
                         bottom.linkTo(parent.bottom)
                     }
                     .padding(end = 40.dp, bottom = 40.dp)
-                    .background(Color(0xFFCC4F4F), RoundedCornerShape(10.dp)),
+                    .background(colorTertiary(), RoundedCornerShape(10.dp)),
                     targetState = expanded,
                     transitionSpec = {
                         fadeIn(animationSpec = tween(150)) with fadeOut(animationSpec = tween(150)) using SizeTransform { initialSize, targetSize ->
@@ -176,88 +180,11 @@ fun DiaryHomePage(uiState: DiaryHomeViewModel.DiaryHomeUiState, clickable: () ->
 }
 
 @Composable
-fun content(uiState: DiaryHomeViewModel.DiaryHomeUiState) {
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .background(Color.Black)
-//    ) {
-//        Box(
-//            Modifier
-//                .fillMaxWidth()
-//                .padding(horizontal = 24.dp)
-//        ) {
-//            Text(
-//                text = stringResource(id = R.string.app_name),
-//                modifier = Modifier
-//                    .align(Alignment.CenterStart)
-//                    .padding(top = 50.dp)
-//                    .clickable {
-//                        uiState.addNoteEntity()
-//                    },
-//                color = Color.White,
-//                fontSize = 30.sp,
-//                fontFamily = FontFamily.Serif
-//            )
-//
-//            Image(
-//                modifier = Modifier.align(Alignment.BottomEnd),
-//                painter = painterResource(id = R.drawable.ic_calendar),
-//                contentDescription = ""
-//            )
-//        }
-//
-//        LazyColumn(
-//            modifier = Modifier
-//                .padding(vertical = 16.dp)
-//                .padding(it)
-//                .fillMaxSize()
-//        ) {
-//            items(uiState.homeNoteList?.size ?: 0) {
-//                val note = uiState.homeNoteList!![it]
-//                itemHome(note.noteName, note.noteCount)
-//            }
-//        }
-//    }
-//    var expanded by remember { mutableStateOf(false) }
-//    AnimatedContent(modifier = Modifier
-//        .align(Alignment.BottomEnd)
-//        .padding(end = 40.dp, bottom = 40.dp)
-//        .background(Color(0xFFCC4F4F), RoundedCornerShape(10.dp)),
-//        targetState = expanded,
-//        transitionSpec = {
-//            fadeIn(animationSpec = tween(150)) with fadeOut(animationSpec = tween(150)) using SizeTransform { initialSize, targetSize ->
-//                if (targetState) {
-//                    keyframes {
-//                        IntSize(targetSize.width, initialSize.height) at 150
-//                        durationMillis = 300
-//                    }
-//                } else {
-//                    keyframes {
-//                        IntSize(initialSize.width, targetSize.height) at 150
-//                        durationMillis = 300
-//                    }
-//                }
-//            }
-//        }) { targetExpanded ->
-//        if (targetExpanded) {
-//            Expanded {
-//                expanded = false
-//            }
-//        } else {
-//            AddButton {
-//                expanded = true
-//            }
-//        }
-//    }
-}
-
-@Composable
 fun Expanded(clickable: () -> Unit) {
     val navController = LocalGlobalNavController.current!!
     Column(
         modifier = Modifier
-            .background(Color(0xFFCC4F4F), RoundedCornerShape(10.dp))
+            .background(colorTertiary(), RoundedCornerShape(10.dp))
     ) {
         itemNoteType(NoteType.DIARY) {
             navController.navigate(RouteConfig.ROUTE_DIARY_HOME)
@@ -288,7 +215,7 @@ fun itemNoteType(noteType: NoteType, clickable: (NoteType) -> Unit = {}) {
             painter = painterResource(id = noteType.resId),
             contentDescription = ""
         )
-        Text(text = noteType.name, modifier = Modifier.padding(4.dp), color = Color.White)
+        Text(text = noteType.name, modifier = Modifier.padding(4.dp), color = colorSecondary())
     }
 }
 
@@ -296,7 +223,7 @@ fun itemNoteType(noteType: NoteType, clickable: (NoteType) -> Unit = {}) {
 fun AddButton(modifier: Modifier = Modifier, clickable: () -> Unit) {
     Box(modifier = Modifier
         .then(modifier)
-        .background(Color(0xFFCC4F4F), RoundedCornerShape(10.dp))
+        .background(colorTertiary(), RoundedCornerShape(10.dp))
         .width(60.dp)
         .height(60.dp)
         .clickable {
@@ -319,7 +246,7 @@ fun itemHome(noteName: String, noteCount: Int, clickable: () -> Unit) {
             .height(160.dp)
             .padding(8.dp)
             .background(
-                Color(0xff1c1e1f), RoundedCornerShape(10.dp)
+                colorTertiary(), RoundedCornerShape(10.dp)
             )
             .clickable { clickable() }
     ) {
@@ -330,7 +257,7 @@ fun itemHome(noteName: String, noteCount: Int, clickable: () -> Unit) {
         ) {
             Text(
                 text = noteName,
-                color = Color(0xffa4a5a6),
+                color = colorSecondary(),
                 modifier = Modifier
                     .padding(vertical = 8.dp)
                     .align(Alignment.CenterStart)
@@ -348,8 +275,9 @@ fun itemHome(noteName: String, noteCount: Int, clickable: () -> Unit) {
                 .padding(horizontal = 16.dp),
             targetState = noteCount
         ) { targetCount ->
+            val tertiary = MaterialTheme.colorScheme.tertiary
             Text(
-                text = targetCount.toString(), color = Color.White, fontFamily = FontFamily(
+                text = targetCount.toString(), color = tertiary, fontFamily = FontFamily(
                     Font(
                         resId = R.font.number, weight = FontWeight.Bold, style = FontStyle.Italic
                     )
@@ -374,7 +302,7 @@ fun itemNoteTypePre() {
     itemNoteType(NoteType.DIARY)
 }
 
-@Preview
+@Preview()
 @Composable
 fun AddButtonPrw() {
     AddButton() {

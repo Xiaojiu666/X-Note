@@ -4,7 +4,6 @@ import android.R
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.core.view.WindowCompat
@@ -14,7 +13,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.gx.note.diary.DiaryListRoute
 import com.gx.note.diary.DiaryListViewModel
-import com.gx.note.home.HomePage
 import com.gx.note.ui.LocalGlobalNavController
 import com.gx.note.ui.RouteConfig
 import com.gx.note.ui.theme.XNoteTheme
@@ -29,11 +27,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            HomeNav()
-//            XNoteTheme {
-//
-//            }
-
+            XNoteTheme {
+                HomeNav()
+            }
         }
         KeyboardHandler(findViewById(R.id.content)).handleKeyboard()
         WindowCompat.setDecorFitsSystemWindows(window, false)
