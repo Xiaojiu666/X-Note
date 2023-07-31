@@ -1,23 +1,40 @@
 package com.gx.note
 
 import android.R
+import android.app.Activity
+import android.content.ContextWrapper
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.SavedStateViewModelFactory
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.gx.note.diary.DiaryListRoute
-import com.gx.note.diary.DiaryListViewModel
+import androidx.navigation.navArgument
+import com.gx.note.diary.editor.DiaryEditorViewModel
+import com.gx.note.diary.editor.DiaryEditorPage
+import com.gx.note.diary.editor.diaryEditorViewModel
+import com.gx.note.diary.list.DiaryListRoute
+import com.gx.note.diary.list.DiaryListViewModel
+import com.gx.note.recommend.DiaryHomeRoute
+import com.gx.note.recommend.RecommendHomeViewModel
 import com.gx.note.ui.LocalGlobalNavController
 import com.gx.note.ui.RouteConfig
 import com.gx.note.ui.theme.XNoteTheme
 import com.gx.note.ui.utils.KeyboardHandler
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.internal.lifecycle.HiltViewModelFactory
 
 
 @AndroidEntryPoint
@@ -42,13 +59,17 @@ class MainActivity : ComponentActivity() {
         CompositionLocalProvider(LocalGlobalNavController provides navController) {
             NavHost(navController = navController, startDestination = RouteConfig.ROUTE_HOME_PAGE) {
 
-                composable(RouteConfig.ROUTE_HOME_PAGE) {
-                    val viewModel: DiaryHomeViewModel = hiltViewModel()
+                composable(route = RouteConfig.ROUTE_HOME_PAGE) {
+                    val viewModel: RecommendHomeViewModel = hiltViewModel()
                     DiaryHomeRoute(viewModel)
                 }
 
-                composable(RouteConfig.ROUTE_DIARY_HOME) {
-                    val viewModel: DiaryEditViewModel = hiltViewModel()
+                composable(RouteConfig.ROUTE_DIARY_HOME + "?diaryId={diaryId}",
+                    arguments = listOf(
+                        navArgument("diaryId") { defaultValue = -1 },
+                    )) {
+                    val diaryId = it.arguments?.getInt("diaryId") ?: -1
+                    val viewModel: DiaryEditorViewModel = diaryEditorViewModel(diaryId,it)
                     DiaryEditorPage(viewModel, onBackClick = {
                         navController.popBackStack()
                     })

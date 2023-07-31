@@ -1,4 +1,4 @@
-package com.gx.note
+package com.gx.note.recommend
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -12,6 +12,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,16 +22,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,19 +53,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import com.gx.note.NoteType
+import com.gx.note.R
+import com.gx.note.entity.RecommendType
 import com.gx.note.ui.LocalGlobalNavController
 import com.gx.note.ui.RouteConfig
 import com.gx.note.ui.RouteConfig.ROUTE_DIARY_LIST_PAGE
 import com.gx.note.ui.theme.colorPrimary
 import com.gx.note.ui.theme.colorSecondary
 import com.gx.note.ui.theme.colorTertiary
+import com.gx.note.ui.utils.screenWidth
+import kotlinx.coroutines.delay
 
 
 @Composable
-fun DiaryHomeRoute(diaryHomeViewModel: DiaryHomeViewModel) {
+fun DiaryHomeRoute(diaryHomeViewModel: RecommendHomeViewModel) {
     val current = LocalGlobalNavController.current
     val uiState by diaryHomeViewModel.uiState.collectAsState()
     DiaryHomePage(uiState = uiState, clickable = { current?.navigate(ROUTE_DIARY_LIST_PAGE) })
+
+    LaunchedEffect(Unit) {
+        delay(500)
+        diaryHomeViewModel.initDiaryHomeUiState()
+    }
 }
 
 @OptIn(
@@ -71,7 +83,7 @@ fun DiaryHomeRoute(diaryHomeViewModel: DiaryHomeViewModel) {
     ExperimentalAnimationApi::class
 )
 @Composable
-fun DiaryHomePage(uiState: DiaryHomeViewModel.DiaryHomeUiState, clickable: () -> Unit) {
+fun DiaryHomePage(uiState: RecommendHomeViewModel.DiaryHomeUiState, clickable: () -> Unit) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -114,11 +126,15 @@ fun DiaryHomePage(uiState: DiaryHomeViewModel.DiaryHomeUiState, clickable: () ->
 
                     Image(
                         modifier = Modifier.align(Alignment.BottomEnd),
-                        painter = painterResource(id = R.drawable.ic_calendar),
+                        painter = if (isSystemInDarkTheme()) {
+                            painterResource(id = R.drawable.ic_calendar_light)
+                        } else {
+                            painterResource(id = R.drawable.ic_calendar_night)
+                        },
                         contentDescription = ""
                     )
                 }
-                uiState.homeNoteList?.let {
+                uiState.recommendList?.let {
                     LazyVerticalStaggeredGrid(modifier = Modifier
                         .constrainAs(list) {
                             start.linkTo(parent.start)
@@ -130,12 +146,29 @@ fun DiaryHomePage(uiState: DiaryHomeViewModel.DiaryHomeUiState, clickable: () ->
                         .padding(vertical = 8.dp),
                         columns = StaggeredGridCells.Fixed(2),
                         content = {
-                            items(it) {
-                                itemHome(
-                                    noteName = it.noteName,
-                                    noteCount = it.noteCount,
-                                    clickable = clickable
-                                )
+                            items(it) { recommendEntity ->
+                                when (recommendEntity.type) {
+                                    RecommendType.DIARY ->
+                                        itemDiaryRecommend(
+                                            noteName = recommendEntity.type.title,
+                                            noteCount = recommendEntity.size,
+                                            clickable = clickable
+                                        )
+                                    RecommendType.PLAN ->
+                                        itemPlanRecommend(
+                                            noteName = recommendEntity.type.title,
+                                            noteCount = recommendEntity.size,
+                                            clickable = clickable
+                                        )
+                                    else -> {
+                                        itemDiaryRecommend(
+                                            noteName = recommendEntity.type.title,
+                                            noteCount = recommendEntity.size,
+                                            clickable = clickable
+                                        )
+                                    }
+                                }
+
                             }
                         })
                 }
@@ -239,11 +272,11 @@ fun AddButton(modifier: Modifier = Modifier, clickable: () -> Unit) {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun itemHome(noteName: String, noteCount: Int, clickable: () -> Unit) {
+fun itemDiaryRecommend(noteName: String, noteCount: Int, clickable: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(160.dp)
+            .height(140.dp)
             .padding(8.dp)
             .background(
                 colorTertiary(), RoundedCornerShape(10.dp)
@@ -272,27 +305,63 @@ fun itemHome(noteName: String, noteCount: Int, clickable: () -> Unit) {
         AnimatedContent(
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 8.dp),
             targetState = noteCount
         ) { targetCount ->
-            val tertiary = MaterialTheme.colorScheme.tertiary
             Text(
-                text = targetCount.toString(), color = tertiary, fontFamily = FontFamily(
+                text = targetCount.toString(), color = colorSecondary(), fontFamily = FontFamily(
                     Font(
                         resId = R.font.number, weight = FontWeight.Bold, style = FontStyle.Italic
                     )
-                ), fontSize = 66.sp
+                ), fontSize = 55.sp
             )
         }
     }
 }
 
+@Composable
+fun itemPlanRecommend(noteName: String, noteCount: Int, clickable: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .width(screenWidth() / 2)
+            .height(140.dp)
+            .padding(8.dp)
+            .background(
+                colorTertiary(), RoundedCornerShape(10.dp)
+            )
+            .clickable { clickable() }
+    ) {
+        LazyColumn {
+            item {
+                itemPlanCheckBox()
+                itemPlanCheckBox()
+            }
+        }
+    }
+}
 
 @Preview
 @Composable
-fun itemHomePrw() {
-    itemHome("你好", 10) {
+fun itemDiaryRecommendPrw() {
+    itemDiaryRecommend("你好", 10) {
 
+    }
+}
+
+@Preview
+@Composable
+fun itemPlanRecommendPrw() {
+    itemPlanRecommend("你好", 10) {
+
+    }
+}
+
+@Preview
+@Composable
+fun itemPlanCheckBox() {
+    Row(verticalAlignment = CenterVertically, modifier = Modifier.padding(horizontal = 8.dp)) {
+        Checkbox(checked = false, onCheckedChange = {})
+        Text(text = "Plan A")
     }
 }
 

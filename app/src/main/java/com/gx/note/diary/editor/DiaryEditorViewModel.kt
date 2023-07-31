@@ -1,26 +1,42 @@
-package com.gx.note
+package com.gx.note.diary.editor
 
-import android.util.Log
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.gx.note.UiStateWrapper
 import com.gx.note.entity.DiaryContent
 import com.gx.note.entity.TextContent
 import com.gx.note.repo.DiaryRepo
 import com.gx.note.ui.SpanStyleNormal
 import com.gx.note.ui.SpanStyleType
+import com.gx.note.usecase.DiaryUseCase
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class DiaryEditViewModel @Inject constructor(
-    val repo: DiaryRepo
+class DiaryEditorViewModel @AssistedInject constructor(
+    private val repo: DiaryRepo,
+    private val diaryUseCase: DiaryUseCase,
+    @Assisted("diaryId") val diaryId: Int,
 ) : ViewModel() {
+    companion object {
+        fun provideFactory(
+            assistedFactory: DiaryEditorViewModelFactory,
+            diaryId: Int,
+        ): ViewModelProvider.Factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return assistedFactory.create(diaryId) as T
+            }
+        }
+    }
 
     private val _uiState = MutableStateFlow(
         initDiaryEditUiState()
@@ -29,15 +45,17 @@ class DiaryEditViewModel @Inject constructor(
         _uiState.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initDiaryEditUiState())
 
     private fun initDiaryEditUiState(): DiaryEditUiState {
-        val richEditorContentUiState = RichEditorContentUiState(textFieldValue = TextFieldValue(),
+        val richEditorContentUiState = RichEditorContentUiState(
             spanStyleType = SpanStyleNormal,
             onContentChange = {
-                val textContent = _uiState.value.richEditorContentUiState.textContent
+                val textContent =
+                    _uiState.value.richEditorContentUiState.textContent ?: mutableListOf()
                 val textFieldValue = _uiState.value.richEditorContentUiState.textFieldValue
                 val currentEditorType = _uiState.value.richEditorContentUiState.spanStyleType
-                val oldTextFieldValue = textFieldValue.text.length
+                val oldTextFieldValue = textFieldValue?.text?.length ?: 0
 
                 if (textContent.isEmpty()) {
+                    println("textContent isEmpty ")
                     textContent.add(
                         TextContent(
                             text = it.text,
@@ -53,30 +71,27 @@ class DiaryEditViewModel @Inject constructor(
                     }
                     return@RichEditorContentUiState
                 }
-
                 if (oldTextFieldValue > it.text.length) {
-                    println("onContentChange remove ${oldTextFieldValue - it.text.length}")
                     val lastContent = textContent.last()
                     val text = it.text.substring(lastContent.startPosition, it.selection.end)
                     val copy = textContent.last().copy(
-                            text = text,
-                            startPosition = lastContent.startPosition,
-                            endPosition = it.selection.end
-                        )
+                        text = text,
+                        startPosition = lastContent.startPosition,
+                        endPosition = it.selection.end
+                    )
                     textContent.removeAt(textContent.lastIndex)
                     if (it.text.length > lastContent.startPosition) {
                         textContent.add(copy)
                     }
                 } else if (oldTextFieldValue < it.text.length) {
-                    println("onContentChange add ${it.text.length - oldTextFieldValue}")
                     val lastContent = textContent.last()
                     if (lastContent.spanStyleType == currentEditorType.id) {
                         val text = it.text.substring(lastContent.startPosition, it.selection.end)
                         val copy = textContent.last().copy(
-                                text = text,
-                                startPosition = lastContent.startPosition,
-                                endPosition = it.selection.end
-                            )
+                            text = text,
+                            startPosition = lastContent.startPosition,
+                            endPosition = it.selection.end
+                        )
                         textContent.removeAt(textContent.lastIndex)
                         textContent.add(copy)
                     } else {
@@ -91,7 +106,6 @@ class DiaryEditViewModel @Inject constructor(
                         )
                     }
                 } else {
-                    println("onContentChange 移动 ${it.toString()}")
                 }
 
                 viewModelScope.launch {
@@ -126,18 +140,25 @@ class DiaryEditViewModel @Inject constructor(
 
     private fun initDiary() {
         viewModelScope.launch(Dispatchers.IO) {
-//            val data = repo.appDatabase.diaryContentDao().loadAllByIds(2)
-//            val list = repo.appDatabase.textContentDao().loadAllByIds(2)
-//            val content = list.joinToString("") {
-//                it.text
-//            }
-//            updateRichEditorTitleUiState {
-//                it.copy(titleValue = TextFieldValue(data.name))
-//            }
-//
-//            updateRichEditorContentUiState { richEditorUi ->
-//                richEditorUi.copy(textContent = list.toMutableList())
-//            }
+            if (diaryId >= 0) {
+                val diaryDetail = diaryUseCase.getDiaryDetails(diaryId)
+                updateRichEditorTitleUiState {
+                    it.copy(
+                        titleValue = TextFieldValue(
+                            diaryDetail.name,
+                            TextRange(diaryDetail.name.length)
+                        )
+                    )
+                }
+                updateRichEditorContentUiState { richEditorUi ->
+                    richEditorUi.copy(
+                        textFieldValue = TextFieldValue(
+                            diaryDetail.textContent.orEmpty(),
+                            TextRange(diaryDetail.textContent?.length ?: 0)
+                        ), textContent = diaryDetail.textContents?.toMutableList()
+                    )
+                }
+            }
         }
     }
 
@@ -151,6 +172,13 @@ class DiaryEditViewModel @Inject constructor(
         )
     }
 
+    private suspend fun updateDiaryEditUiState(block: (DiaryEditUiState) -> DiaryEditUiState) {
+        val diaryEditUiState = _uiState.value
+        _uiState.emit(
+            block(diaryEditUiState)
+        )
+    }
+
     private suspend fun updateRichEditorContentUiState(block: (RichEditorContentUiState) -> RichEditorContentUiState) {
         val diaryEditUiState = _uiState.value
         _uiState.emit(
@@ -161,44 +189,45 @@ class DiaryEditViewModel @Inject constructor(
     }
 
     private fun saveDiary() {
-
         viewModelScope.launch(Dispatchers.IO) {
-            for (i in 1..200) {
-                val titleValue = uiState.value.richEditorTitleUiState.titleValue.text + i
-                val contents = uiState.value.richEditorContentUiState.textContent
-                val users = DiaryContent(titleValue)
-                val insertId = repo.appDatabase.diaryContentDao().insert(users)
-                println("insertId $insertId")
-//                contents.forEach {
-//                    it.diaryId = insertId.toInt()
-//                    repo.appDatabase.textContentDao().insert(it)
-//                }
+            val titleValue = uiState.value.richEditorTitleUiState.titleValue.text
+            val contents = uiState.value.richEditorContentUiState.textContent
+            val users = DiaryContent(titleValue)
+            val insertId = repo.appDatabase.diaryContentDao().insert(users)
+            contents?.forEach {
+                it.diaryId = insertId.toInt()
+                repo.appDatabase.textContentDao().insert(it)
             }
-            val list = repo.appDatabase.diaryContentDao().getUsersWithPlaylists()
-            println("getUsersWithPlaylists $list")
+            updateDiaryEditUiState {
+                it.copy(saveState = SaveState.SUCCESS)
+            }
         }
-
     }
 
 
     data class DiaryEditUiState(
         val richEditorContentUiState: RichEditorContentUiState,
         val richEditorTitleUiState: RichEditorTitleUiState,
-        val onSaveDiary: () -> Unit
+        val onSaveDiary: () -> Unit,
+        val saveState: SaveState = SaveState.NOTHING,
     ) : UiStateWrapper
 
 
     data class RichEditorTitleUiState(
-        val titleValue: TextFieldValue, val onTitleChange: (TextFieldValue) -> Unit
+        val titleValue: TextFieldValue,
+        val onTitleChange: (TextFieldValue) -> Unit
     )
 
     data class RichEditorContentUiState(
-        val textFieldValue: TextFieldValue,
+        val textFieldValue: TextFieldValue? = null,
         val spanStyleType: SpanStyleType,
-        val textContent: MutableList<TextContent>,
+        val textContent: MutableList<TextContent>?,
         val onContentChange: (TextFieldValue) -> Unit,
         val onSpanTypeChange: (SpanStyleType) -> Unit
     ) : UiStateWrapper
 
+    enum class SaveState {
+        SUCCESS, ERROR, LOADING, NOTHING, EMPTY, TOO_LONG,
+    }
 
 }

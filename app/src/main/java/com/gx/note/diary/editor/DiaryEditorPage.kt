@@ -1,41 +1,39 @@
-package com.gx.note
+package com.gx.note.diary.editor
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gx.note.BaseBackToolbar
+import com.gx.note.R
 import com.gx.note.ui.RichEditor
-import com.gx.note.ui.SpanStyleType
 import com.gx.note.ui.withStyle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun DiaryEditorPage(diaryEditViewModel: DiaryEditViewModel, onBackClick: () -> Unit) {
-    val uiState by diaryEditViewModel.uiState.collectAsStateWithLifecycle()
+fun DiaryEditorPage(diaryEditorViewModel: DiaryEditorViewModel, onBackClick: () -> Unit) {
+    val uiState by diaryEditorViewModel.uiState.collectAsStateWithLifecycle()
     val richEditorUiState = uiState.richEditorContentUiState
     val richEditorTitleUiState = uiState.richEditorTitleUiState
+    LaunchedEffect(uiState.saveState) {
+        when (uiState.saveState) {
+            DiaryEditorViewModel.SaveState.SUCCESS ->
+                onBackClick()
+            else -> {}
+        }
+    }
+
     Scaffold(
         modifier = Modifier
             .fillMaxSize()
@@ -46,7 +44,11 @@ fun DiaryEditorPage(diaryEditViewModel: DiaryEditViewModel, onBackClick: () -> U
         topBar = {
             BaseBackToolbar(
                 title = "Diary",
-                rightIconId = R.drawable.ic_save,
+                rightIconId = if (isSystemInDarkTheme()) {
+                    R.drawable.ic_save_night
+                } else {
+                    R.drawable.ic_save_light
+                },
                 onLeftIconClick = onBackClick,
                 onRightIconClick = uiState.onSaveDiary,
             )
@@ -55,7 +57,9 @@ fun DiaryEditorPage(diaryEditViewModel: DiaryEditViewModel, onBackClick: () -> U
 
         RichEditor(
             modifier = Modifier.padding(it),
-            value = richEditorUiState.textFieldValue.withStyle(richEditorUiState.textContent),
+            value = richEditorUiState.textFieldValue?.withStyle(
+                richEditorUiState.textContent ?: emptyList()
+            ) ?: TextFieldValue(),
             titleValue = richEditorTitleUiState.titleValue,
             onTextFieldValueChange = richEditorUiState.onContentChange,
             onTitleValueChange = richEditorTitleUiState.onTitleChange,

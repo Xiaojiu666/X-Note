@@ -3,6 +3,7 @@ package com.gx.note
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -12,19 +13,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.gx.note.ui.LocalToolbarColor
+import com.gx.note.ui.theme.colorPrimary
+import com.gx.note.ui.theme.colorSecondary
+import com.gx.note.ui.theme.colorTertiary
 import com.gx.note.ui.theme.subtitle2Bold
 
 val TOOLBAR_HEIGHT = 56.dp
@@ -37,7 +34,7 @@ fun BaseToolbar(
 ) {
     Box(
         Modifier
-            .background(toolBarColor())
+            .background(colorPrimary())
             .statusBarsPadding()
             .padding(11.dp, 0.dp, 16.dp, 0.dp)
             .fillMaxWidth()
@@ -72,7 +69,11 @@ fun BaseToolbar(
 @Composable
 fun BaseBackToolbar(
     title: String,
-    leftIconId: Int? = R.drawable.ic_back_arrow,
+    leftIconId: Int? = if (isSystemInDarkTheme()) {
+        R.drawable.ic_back_arrow_night
+    } else {
+        R.drawable.ic_back_arrow_light
+    },
     rightIconId: Int? = null,
     onLeftIconClick: () -> Unit = {},
     onRightIconClick: () -> Unit = {}
@@ -99,7 +100,7 @@ fun BaseBackToolbar(
             maxLines = 1,
             textAlign = TextAlign.Center,
             style = subtitle2Bold,
-            color = baseWhite()
+            color = colorSecondary()
         )
     }, {
         if (rightIconId != null) {

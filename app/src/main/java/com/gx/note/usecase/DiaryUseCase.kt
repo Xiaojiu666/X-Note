@@ -9,18 +9,11 @@ import javax.inject.Inject
 class DiaryUseCase @Inject constructor(
     private val repo: DiaryRepo
 ) {
-
-    suspend fun getDiaryList(): List<DiaryContent> {
-        return repo.getDiaryList()
+    suspend fun getDiaryList(pageNum: Int, pageSize: Int): List<DiaryContent> {
+        return repo.getDiaryList(pageNum, pageSize)
     }
 
-
-    suspend fun getDiaryList(pageNum: Int, pageSize: Int): List<DiaryContent>{
-        delay(3000)
-        return repo.getDiaryList(pageNum,pageSize)
-    }
-
-    suspend fun saveDiary() {
-
+    suspend fun getDiaryDetails(id: Int): DiaryContent {
+        return repo.getDiaryDetails(id)
     }
 }

@@ -1,6 +1,5 @@
-package com.gx.note.diary
+package com.gx.note.diary.list
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -35,6 +34,7 @@ import com.gx.note.R
 import com.gx.note.entity.DiaryContent
 import com.gx.note.ui.LocalGlobalNavController
 import com.gx.note.ui.RouteConfig.ROUTE_DIARY_HOME
+import com.gx.note.ui.theme.colorPrimary
 
 @Composable
 fun DiaryListRoute(diaryListViewModel: DiaryListViewModel) {
@@ -45,7 +45,7 @@ fun DiaryListRoute(diaryListViewModel: DiaryListViewModel) {
         lazyPagingItems = lazyPagingItems,
         uiState = uiState,
         onBackClick = { navController?.popBackStack() },
-        onItemClick = { navController?.navigate(ROUTE_DIARY_HOME) })
+        onItemClick = { navController?.navigate("$ROUTE_DIARY_HOME?diaryId=$it") })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,11 +54,11 @@ fun DiaryListPage(
     uiState: LoadableState<DiaryListViewModel.DiaryListUiState>,
     lazyPagingItems: LazyPagingItems<DiaryContent>,
     onBackClick: () -> Unit,
-    onItemClick: () -> Unit
+    onItemClick: (diaryId: Int) -> Unit
 ) {
     Scaffold(modifier = Modifier
         .fillMaxSize()
-        .background(Color.Black),
+        .background(colorPrimary()),
         topBar = { BaseBackToolbar(title = "日记列表", onLeftIconClick = onBackClick) }) {
         LoadableLayout(
             modifier = Modifier.padding(it),
@@ -67,12 +67,12 @@ fun DiaryListPage(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black)
+                    .background(colorPrimary())
             ) {
                 items(lazyPagingItems) {
                     it?.let {
                         DiaryItemView(it) {
-                            onItemClick()
+                            onItemClick(it.id)
                         }
                     }
                 }

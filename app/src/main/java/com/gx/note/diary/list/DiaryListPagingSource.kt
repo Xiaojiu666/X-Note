@@ -1,8 +1,5 @@
-package com.gx.note.diary
+package com.gx.note.diary.list
 
-import android.content.ClipData
-import android.util.Log
-import androidx.paging.PagedList
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.gx.note.entity.DiaryContent
@@ -31,10 +28,6 @@ class DiaryListPagingSource(
                 if (page == 0) {
                     onPageStart()
                 }
-                Log.e(
-                    "getDiaryList",
-                    "page ${page} , params.loadSize ${params.loadSize} "
-                )
                 val response = diaryUseCase.getDiaryList(
                     params.loadSize, params.loadSize * page
                 )
@@ -47,7 +40,6 @@ class DiaryListPagingSource(
                     nextKey = if (response.isEmpty()) null else page + 1
                 )
             } catch (e: Exception) {
-                Log.e("getDiaryList", "${e.message}")
                 onPageError(e)
                 LoadResult.Error(e)
             }
