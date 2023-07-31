@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -36,30 +37,32 @@ fun DiaryEditorPage(diaryEditorViewModel: DiaryEditorViewModel, onBackClick: () 
 
     Scaffold(
         modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black),
+            .fillMaxSize(),
         snackbarHost = {
 
         },
         topBar = {
+            val rightIconId = if (isSystemInDarkTheme()) {
+                R.drawable.ic_save_night
+            } else {
+                R.drawable.ic_save_light
+            }
             BaseBackToolbar(
                 title = "Diary",
-                rightIconId = if (isSystemInDarkTheme()) {
-                    R.drawable.ic_save_night
-                } else {
-                    R.drawable.ic_save_light
-                },
+                rightIconId = rightIconId,
                 onLeftIconClick = onBackClick,
                 onRightIconClick = uiState.onSaveDiary,
             )
         }
     ) {
 
+        val value = richEditorUiState.textFieldValue?.withStyle(
+            richEditorUiState.textContent ?: emptyList()
+        ) ?: TextFieldValue()
+
         RichEditor(
             modifier = Modifier.padding(it),
-            value = richEditorUiState.textFieldValue?.withStyle(
-                richEditorUiState.textContent ?: emptyList()
-            ) ?: TextFieldValue(),
+            value = value,
             titleValue = richEditorTitleUiState.titleValue,
             onTextFieldValueChange = richEditorUiState.onContentChange,
             onTitleValueChange = richEditorTitleUiState.onTitleChange,

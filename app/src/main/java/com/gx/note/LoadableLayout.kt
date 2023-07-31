@@ -1,13 +1,17 @@
 package com.gx.note
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import com.gx.note.ui.theme.colorSecondary
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 
@@ -18,6 +22,7 @@ sealed class LoadableState<T> private constructor(open val data: T?) {
     class Error<T> : LoadableState<T>(null)
 
     class Success<T>(override val data: T) : LoadableState<T>(data)
+    class Empty<T> : LoadableState<T>(null)
 }
 
 fun <T> MutableStateFlow<LoadableState<T>>.updateUiState(updater: (T) -> T) {
@@ -37,6 +42,7 @@ inline fun <reified ContentType> LoadableLayout(
     crossinline onRetryClick: () -> Unit,
     noinline loading: (@Composable BoxScope.() -> Unit)? = null,
     noinline error: (@Composable BoxScope.() -> Unit)? = null,
+    noinline emptyLayout: (@Composable BoxScope.() -> Unit)? = null,
     content: @Composable BoxScope.(ContentType) -> Unit,
 ) {
     Box(modifier) {
@@ -51,6 +57,9 @@ inline fun <reified ContentType> LoadableLayout(
 
             is LoadableState.Success -> {
                 content(loadableState.data)
+            }
+            is LoadableState.Empty -> {
+                emptyLayout?.invoke(this) ?: this.DefaultEmpty(onRetryClick)
             }
         }
     }
@@ -97,12 +106,13 @@ fun DefaultLoading() {
 
 @Composable
 inline fun DefaultError(crossinline onRetryClick: () -> Unit) {
-//    MBErrorPage(
-//        type = MBErrorPageType.NETWORK,
-//        onRetryClick = {
-//            onRetryClick()
-//        },
-//    )
+
+}
+@Composable
+inline fun BoxScope.DefaultEmpty(crossinline onRetryClick: () -> Unit) {
+    Box(modifier = Modifier.align(Alignment.Center).clickable {onRetryClick()  }){
+        Text(text = stringResource(R.string.empty_no_data), color = colorSecondary())
+    }
 }
 
 inline fun <reified T> MutableStateFlow<LoadableState<T>>.valueOrNull(): T? {

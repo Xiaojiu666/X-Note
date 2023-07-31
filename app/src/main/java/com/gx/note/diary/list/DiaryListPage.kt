@@ -3,11 +3,7 @@ package com.gx.note.diary.list
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,9 +15,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
@@ -34,7 +30,9 @@ import com.gx.note.R
 import com.gx.note.entity.DiaryContent
 import com.gx.note.ui.LocalGlobalNavController
 import com.gx.note.ui.RouteConfig.ROUTE_DIARY_HOME
+import com.gx.note.ui.loadMore.LoadMoreView
 import com.gx.note.ui.theme.colorPrimary
+import com.gx.note.ui.theme.colorSecondary
 
 @Composable
 fun DiaryListRoute(diaryListViewModel: DiaryListViewModel) {
@@ -45,7 +43,9 @@ fun DiaryListRoute(diaryListViewModel: DiaryListViewModel) {
         lazyPagingItems = lazyPagingItems,
         uiState = uiState,
         onBackClick = { navController?.popBackStack() },
-        onItemClick = { navController?.navigate("$ROUTE_DIARY_HOME?diaryId=$it") })
+        onItemClick = { navController?.navigate("$ROUTE_DIARY_HOME?diaryId=$it") },
+        onEmptyLayoutClick = { navController?.navigate("$ROUTE_DIARY_HOME")}
+        )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,6 +54,7 @@ fun DiaryListPage(
     uiState: LoadableState<DiaryListViewModel.DiaryListUiState>,
     lazyPagingItems: LazyPagingItems<DiaryContent>,
     onBackClick: () -> Unit,
+    onEmptyLayoutClick: () -> Unit,
     onItemClick: (diaryId: Int) -> Unit
 ) {
     Scaffold(modifier = Modifier
@@ -63,7 +64,13 @@ fun DiaryListPage(
         LoadableLayout(
             modifier = Modifier.padding(it),
             loadableState = uiState,
-            onRetryClick = {}) {
+            onRetryClick = {
+
+            },
+            emptyLayout = {
+                DiaryListEmptyLayout(onEmptyLayoutClick)
+            }
+        ) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -76,33 +83,15 @@ fun DiaryListPage(
                         }
                     }
                 }
-
-                when {
-                    lazyPagingItems.loadState.append is LoadState.Loading -> {
-                        item {
-                            LoadMorePlaceholder()
-                        }
-                    }
-
-                    lazyPagingItems.loadState.append is LoadState.Error -> {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(20.dp)
-                                    .background(Color.Red)
-                            )
-                        }
-                    }
-
-                    lazyPagingItems.loadState.refresh is LoadState.NotLoading -> {
-                        item {
-                            LoadCompletePlaceholder()
-                        }
-                    }
-                }
+                LoadMoreView(lazyPagingItems)
             }
         }
+    }
+}
+@Composable
+fun BoxScope.DiaryListEmptyLayout(onEmptyLayoutClick:()->Unit){
+    Box(modifier = Modifier.align(Alignment.Center).clickable { onEmptyLayoutClick()  }){
+        Text(text = stringResource(R.string.empty_no_data), color = colorSecondary())
     }
 }
 
