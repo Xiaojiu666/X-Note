@@ -53,6 +53,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
 import com.gx.note.NoteType
 import com.gx.note.R
 import com.gx.note.entity.RecommendType
@@ -64,6 +66,7 @@ import com.gx.note.ui.theme.colorSecondary
 import com.gx.note.ui.theme.colorTertiary
 import com.gx.note.ui.utils.screenWidth
 import kotlinx.coroutines.delay
+import java.io.File
 
 
 @Composable
@@ -155,6 +158,12 @@ fun DiaryHomePage(uiState: RecommendHomeViewModel.DiaryHomeUiState, clickable: (
                                             clickable = clickable
                                         )
                                     RecommendType.PLAN ->
+                                        itemPlanRecommend(
+                                            noteName = recommendEntity.type.title,
+                                            noteCount = recommendEntity.size,
+                                            clickable = clickable
+                                        )
+                                    RecommendType.CLIPBOARD ->
                                         itemPlanRecommend(
                                             noteName = recommendEntity.type.title,
                                             noteCount = recommendEntity.size,
@@ -337,6 +346,23 @@ fun itemPlanRecommend(noteName: String, noteCount: Int, clickable: () -> Unit) {
                 itemPlanCheckBox()
             }
         }
+    }
+}
+@Composable
+fun itemClipboardRecommend(noteName: String, noteCount: Int, clickable: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .width(screenWidth() / 2)
+            .height(140.dp)
+            .padding(8.dp)
+            .background(
+                colorTertiary(), RoundedCornerShape(10.dp)
+            )
+            .clickable { clickable() }
+    ) {
+        val imageFile = File("/image.jpg")
+
+        Image(painter = rememberAsyncImagePainter(imageFile),contentDescription = "   ,")
     }
 }
 
