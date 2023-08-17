@@ -79,7 +79,7 @@ class MainActivity : ComponentActivity() {
                     val viewModel: DiaryListViewModel = hiltViewModel()
                     DiaryListRoute(viewModel)
                 }
-
+                //git test
             }
         }
     }
