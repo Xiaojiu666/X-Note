@@ -31,16 +31,24 @@ class DiaryListViewModel @Inject constructor(private val diaryUseCase: DiaryUseC
                     }
                 },
                 onPageEnd = {
-                    initDiaryHomeUiState()
+                    viewModelScope.launch(IO) {
+                        if (it > 0){
+                            initDiaryHomeUiState()
+                        }else{
+                            initEmptyState()
+                        }
+                    }
                 }, onPageError = {
                 }
             )
         }.flow.cachedIn(viewModelScope)
 
-    private fun initDiaryHomeUiState() {
-        viewModelScope.launch(IO) {
-            _uiState.emit(LoadableState.Success(DiaryListUiState(100)))
-        }
+    private suspend fun initDiaryHomeUiState() {
+        _uiState.emit(LoadableState.Success(DiaryListUiState(100)))
+    }
+
+    private suspend fun initEmptyState() {
+        _uiState.emit(LoadableState.Empty())
     }
 
     data class DiaryListUiState(

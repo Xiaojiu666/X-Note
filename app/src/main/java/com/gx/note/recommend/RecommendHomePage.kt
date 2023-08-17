@@ -8,11 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.with
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,10 +23,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,6 +34,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Canvas
+import androidx.compose.ui.graphics.painter.ColorPainter
+
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
@@ -53,6 +51,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.navigation.NavGraph
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
 import com.gx.note.NoteType
 import com.gx.note.R
 import com.gx.note.entity.RecommendType
@@ -64,17 +65,47 @@ import com.gx.note.ui.theme.colorSecondary
 import com.gx.note.ui.theme.colorTertiary
 import com.gx.note.ui.utils.screenWidth
 import kotlinx.coroutines.delay
+import java.io.File
 
 
 @Composable
 fun DiaryHomeRoute(diaryHomeViewModel: RecommendHomeViewModel) {
     val current = LocalGlobalNavController.current
     val uiState by diaryHomeViewModel.uiState.collectAsState()
-    DiaryHomePage(uiState = uiState, clickable = { current?.navigate(ROUTE_DIARY_LIST_PAGE) })
+    val colorMatrix = ColorMatrix()
+    colorMatrix.setToSaturation(0f)
+    val colorFilter = ColorFilter.colorMatrix(colorMatrix)
+    val painter = ColorPainter(Color.Red)
+    Surface(color =Color.Blue) {
+        // 正常布局
+        drawImage()
+        // 黑白化
+        Canvas(modifier = Modifier.fillMaxSize()){
+            drawRect(
+                color = Color.Yellow,
+                colorFilter = colorFilter,
+                alpha = 0f,
+                blendMode = BlendMode.Saturation
+            )
+        }
+    }
+//https://blog.csdn.net/haojiagou/article/details/121907618
 
-    LaunchedEffect(Unit) {
-        delay(500)
-        diaryHomeViewModel.initDiaryHomeUiState()
+//    DiaryHomePage(uiState = uiState, clickable = { current?.navigate(ROUTE_DIARY_LIST_PAGE) })
+//
+//    LaunchedEffect(Unit) {
+//        delay(500)
+//        diaryHomeViewModel.initDiaryHomeUiState()
+//    }
+}
+
+@Composable
+fun drawImage(){
+    Column {
+        Image(painter = painterResource(R.mipmap.ic_launcher),contentDescription = null)
+        Image(painter = painterResource(R.mipmap.ic_launcher),contentDescription = null)
+        Image(painter = painterResource(R.mipmap.ic_launcher),contentDescription = null)
+        Image(painter = painterResource(R.mipmap.ic_launcher),contentDescription = null)
     }
 }
 
@@ -155,6 +186,12 @@ fun DiaryHomePage(uiState: RecommendHomeViewModel.DiaryHomeUiState, clickable: (
                                             clickable = clickable
                                         )
                                     RecommendType.PLAN ->
+                                        itemPlanRecommend(
+                                            noteName = recommendEntity.type.title,
+                                            noteCount = recommendEntity.size,
+                                            clickable = clickable
+                                        )
+                                    RecommendType.CLIPBOARD ->
                                         itemPlanRecommend(
                                             noteName = recommendEntity.type.title,
                                             noteCount = recommendEntity.size,
@@ -337,6 +374,23 @@ fun itemPlanRecommend(noteName: String, noteCount: Int, clickable: () -> Unit) {
                 itemPlanCheckBox()
             }
         }
+    }
+}
+@Composable
+fun itemClipboardRecommend(noteName: String, noteCount: Int, clickable: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .width(screenWidth() / 2)
+            .height(140.dp)
+            .padding(8.dp)
+            .background(
+                colorTertiary(), RoundedCornerShape(10.dp)
+            )
+            .clickable { clickable() }
+    ) {
+        val imageFile = File("/image.jpg")
+
+        Image(painter = rememberAsyncImagePainter(imageFile),contentDescription = "   ,")
     }
 }
 

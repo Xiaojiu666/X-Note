@@ -44,6 +44,7 @@ import com.gx.note.baseBlack
 import com.gx.note.baseWhite
 import com.gx.note.entity.TextContent
 import com.gx.note.ui.theme.body2
+import com.gx.note.ui.theme.colorSecondary
 import com.gx.note.ui.theme.headline6Sans
 import com.gx.note.ui.utils.Keyboard
 import com.gx.note.ui.utils.keyboardAsState
@@ -123,15 +124,6 @@ fun RichEditor(
 }
 
 
-fun List<TextContent>.updateLastText(value: TextFieldValue): MutableList<TextContent> =
-    mapIndexed { index, editorText ->
-        if (index == lastIndex) {
-            editorText.copy(text = value.text, endPosition = value.selection.end)
-        } else {
-            editorText
-        }
-    }.toMutableList()
-
 fun TextFieldValue.withStyle(editorTexts: List<TextContent>) =
     copy(annotatedString = buildAnnotatedString {
         editorTexts.forEach { editorText ->
@@ -199,7 +191,7 @@ fun EditorBottomView(modifier: Modifier = Modifier, onBoldClick: (SpanStyleType)
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.LightGray)
+                .background(Color.Blue)
                 .height(0.5.dp)
         )
         Row(
@@ -209,7 +201,6 @@ fun EditorBottomView(modifier: Modifier = Modifier, onBoldClick: (SpanStyleType)
                 .horizontalScroll(rememberScrollState())
                 .height(46.dp)
         ) {
-
 
             Image(
                 modifier = Modifier
@@ -246,21 +237,21 @@ fun EditorBottomView(modifier: Modifier = Modifier, onBoldClick: (SpanStyleType)
             )
         }
 
-        val keyboardState = keyboardAsState()
-        if (keyboardState.value == Keyboard.Closed) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .navigationBarsPadding()
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-            )
-        }
+//        val keyboardState = keyboardAsState()
+//        if (keyboardState.value == Keyboard.Closed) {
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .background(Color.White)
+//                    .navigationBarsPadding()
+//            )
+//        } else {
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .background(Color.White)
+//            )
+//        }
     }
 }
 

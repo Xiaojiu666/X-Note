@@ -10,7 +10,7 @@ import kotlinx.coroutines.withContext
 class DiaryListPagingSource(
     private val diaryUseCase: DiaryUseCase,
     private val onPageStart: () -> Unit,
-    private val onPageEnd: () -> Unit,
+    private val onPageEnd: (dataSize:Int) -> Unit,
     private val onPageError: (throwable: Throwable) -> Unit
 ) : PagingSource<Int, DiaryContent>() {
     override fun getRefreshKey(state: PagingState<Int, DiaryContent>): Int? {
@@ -32,7 +32,7 @@ class DiaryListPagingSource(
                     params.loadSize, params.loadSize * page
                 )
                 if (page == 0) {
-                    onPageEnd()
+                    onPageEnd(response.size)
                 }
                 LoadResult.Page(
                     data = response,
