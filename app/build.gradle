@@ -74,6 +74,8 @@ dependencies {
     implementation(libs.paging.compose)
 
     implementation("org.jetbrains.compose.ui:ui-util:1.3.0")
+    implementation 'com.kizitonwose.calendar:compose:2.3.0'
+    implementation "dev.chrisbanes.snapper:snapper:0.3.0"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

@@ -235,7 +235,7 @@ fun Expanded(clickable: () -> Unit) {
 
         }
         itemNoteType(NoteType.TODO) {
-
+            navController.navigate(RouteConfig.ROUTE_TODO_CREATE_PAGE)
         }
     }
 }

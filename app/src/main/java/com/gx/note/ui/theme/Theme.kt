@@ -20,17 +20,7 @@ import com.gx.note.R
 import com.gx.note.baseBlack
 import com.gx.note.baseWhite
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF000000),
-    secondary = Color(0xFFFFFFFF),
-    tertiary = Color(0xFFF3F3F3),
-)
-private val LightColorScheme = lightColorScheme(
-    primary = Color(0xFFFFFFFF),
-    secondary = Color(0xFF000000),
-    tertiary = Color(0xFFF3F3F3),
-    background = Color(0xFFFFFFFF)
-)
+
 
 @Composable
 fun XNoteTheme(

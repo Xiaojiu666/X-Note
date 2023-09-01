@@ -5,4 +5,6 @@
     <string name="loading_more">加载更多中…</string>
     <string name="loading_complete">没有更多数据了~</string>
     <string name="empty_no_data">您暂时没有数据，点击创建~</string>
+    <string name="todo_create">新建Todo</string>
+    <string name="time_start">开始</string>
 </resources>
