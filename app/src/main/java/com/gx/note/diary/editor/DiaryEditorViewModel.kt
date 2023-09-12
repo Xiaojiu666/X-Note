@@ -8,14 +8,12 @@ import androidx.lifecycle.viewModelScope
 import com.gx.note.UiStateWrapper
 import com.gx.note.entity.DiaryContent
 import com.gx.note.entity.TextContent
-import com.gx.note.repo.DiaryRepo
+import com.gx.note.repo.DiaryRepository
 import com.gx.note.ui.SpanStyleNormal
 import com.gx.note.ui.SpanStyleType
 import com.gx.note.usecase.DiaryUseCase
 import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,7 +21,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class DiaryEditorViewModel @AssistedInject constructor(
-    private val repo: DiaryRepo,
+    private val repo: DiaryRepository,
     private val diaryUseCase: DiaryUseCase,
     @Assisted("diaryId") val diaryId: Int,
 ) : ViewModel() {

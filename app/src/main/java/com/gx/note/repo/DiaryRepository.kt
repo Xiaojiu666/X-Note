@@ -1,13 +1,12 @@
 package com.gx.note.repo
 
-import androidx.paging.PagingSource
 import com.gx.note.database.AppDatabase
 import com.gx.note.entity.DiaryContent
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.zip
 import javax.inject.Inject
 
-class DiaryRepo @Inject constructor(val appDatabase: AppDatabase) {
+class DiaryRepository @Inject constructor(val appDatabase: AppDatabase) {
 
     suspend fun getDiaryList(): List<DiaryContent> {
         return appDatabase.diaryContentDao().getDiaryList()

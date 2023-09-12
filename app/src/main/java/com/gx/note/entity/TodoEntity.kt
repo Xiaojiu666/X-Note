@@ -6,15 +6,15 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class TodoEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
     val todoContent: String,
-    val level: Int,
-    val startTime: Long,
-    val endTime: Long,
-    val repeatPeriod: Int,
-    val repeatSize: Int,
-    val reminderTime: Long,
-    val reminderType: Int,
-    val todoDesc: String? = null
+    val startTime: Long= System.currentTimeMillis(),
+    val endTime: Long= System.currentTimeMillis(),
+    val repeatPeriod: Int = 0  ,
+    val repeatSize: Int = 2 ,
+    val reminderTime: Long = System.currentTimeMillis(),
+    val reminderType: Int = 0,
+    val todoDesc: String? = null,
+    val level: Int = 0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0
 )

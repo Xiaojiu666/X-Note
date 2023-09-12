@@ -56,6 +56,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.gx.note.BaseBackToolbar
 import com.gx.note.R
 import com.gx.note.TOOLBAR_HEIGHT
@@ -70,13 +72,16 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun CreateTodoRoute() {
-
+fun CreateTodoRoute(createTodoViewModel: CreateTodoViewModel, navController: NavController) {
+    val uiState by createTodoViewModel.uiState.collectAsStateWithLifecycle()
+    CreateTodoPage(uiState = uiState, onBackClick = {
+        navController.popBackStack()
+    })
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun CreateTodoPage(onBackClick: () -> Unit) {
+fun CreateTodoPage(uiState: CreateTodoViewModel.TodoUiState, onBackClick: () -> Unit) {
     var type by remember {
         mutableStateOf(1)
     }
@@ -90,7 +95,11 @@ fun CreateTodoPage(onBackClick: () -> Unit) {
         topBar = {
             BaseBackToolbar(
                 title = stringResource(id = R.string.todo_create),
+                rightIconId = R.drawable.ic_save_night,
                 onLeftIconClick = onBackClick,
+                onRightIconClick = {
+                    uiState.onSaveTodo()
+                }
             )
         },
         sheetPeekHeight = 0.dp,

@@ -1,13 +1,11 @@
 package com.gx.note.usecase
 
-import androidx.paging.PagingSource
 import com.gx.note.entity.DiaryContent
-import com.gx.note.repo.DiaryRepo
-import kotlinx.coroutines.delay
+import com.gx.note.repo.DiaryRepository
 import javax.inject.Inject
 
 class DiaryUseCase @Inject constructor(
-    private val repo: DiaryRepo
+    private val repo: DiaryRepository
 ) {
     suspend fun getDiaryList(pageNum: Int, pageSize: Int): List<DiaryContent> {
         return repo.getDiaryList(pageNum, pageSize)

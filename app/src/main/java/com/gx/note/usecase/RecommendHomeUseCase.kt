@@ -1,13 +1,12 @@
 package com.gx.note.usecase
 
-import com.gx.note.entity.DiaryContent
 import com.gx.note.entity.RecommendEntity
 import com.gx.note.entity.RecommendType
-import com.gx.note.repo.DiaryRepo
+import com.gx.note.repo.DiaryRepository
 import javax.inject.Inject
 
 class RecommendHomeUseCase @Inject constructor(
-    private val repo: DiaryRepo
+    private val repo: DiaryRepository
 ) {
     suspend fun getRecommendList(): List<RecommendEntity> {
         val diaryList = repo.getDiaryList()

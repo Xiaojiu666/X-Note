@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.room.Room
 import com.gx.note.NoteApp
+import com.gx.note.dao.TodoEntityDao
 import com.gx.note.database.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -24,5 +25,11 @@ class DiaryModule {
             context,
             AppDatabase::class.java, "database-name"
         ).build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideTodoDao(@ApplicationContext context: Context): TodoEntityDao {
+        return provideAppDatabase(context).todoEntityDao()
     }
 }
